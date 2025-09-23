@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "../constants/api";
+
 export async function sendContactEmail({ name, email, phone, message }) {
   const subject = `Contact Form Submission: ${name}`;
   const text = `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nMessage: ${message}`;
@@ -8,7 +10,7 @@ export async function sendContactEmail({ name, email, phone, message }) {
     <p><strong>Phone:</strong> ${phone}</p>
     <p><strong>Message:</strong><br/>${message.replace(/\n/g, '<br/>')}</p>
   `;
-  const response = await fetch('https://kp-backend-pfn7.onrender.com/api/email/submit-form', {
+  const response = await fetch(`${API_BASE_URL}/api/email/submit-form`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ subject, text, html })

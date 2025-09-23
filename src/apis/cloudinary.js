@@ -1,6 +1,8 @@
+import { API_BASE_URL } from "../constants/api";
+
 export async function fetchCloudinaryImages(folder) {
   try {
-    const res = await fetch(`https://kp-backend-pfn7.onrender.com/api/images/by-folder-name/${folder}`);
+    const res = await fetch(`${API_BASE_URL}/api/images/by-folder-name/${folder}`);
     const data = await res.json();
     return data;
   } catch (err) {
@@ -11,7 +13,7 @@ export async function fetchCloudinaryImages(folder) {
 
 export async function fetchCloudinaryImagesById(folderId) {
   try {
-    const res = await fetch(`https://kp-backend-pfn7.onrender.com/api/images/${folderId}`);
+    const res = await fetch(`${API_BASE_URL}/api/images/${folderId}`);
     const data = await res.json();
     return data;
   } catch (err) {
