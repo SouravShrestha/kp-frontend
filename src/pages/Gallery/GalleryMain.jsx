@@ -1,7 +1,6 @@
 import SplideGalleryBanner from "./SplideGalleryBanner";
 import { useEffect, useState } from "react";
-import { fetchSubfoldersByName, fetchSubfoldersById } from "../../apis/gallery";
-import { fetchCloudinaryImagesById } from "../../apis/cloudinary";
+import { FolderAPI, MediaAPI } from "../../apis";
 import SubfolderCards from "./SubfolderCards";
 
 const GalleryMain = () => {
@@ -16,7 +15,7 @@ const GalleryMain = () => {
   }, []);
 
   useEffect(() => {
-    fetchSubfoldersByName("kp-gallery").then((folders) => {
+    FolderAPI.fetchSubfoldersByName("kp-gallery").then((folders) => {
       setTabs(folders);
       if (folders.length > 0) setActiveTab(folders[0].name);
     });
@@ -26,11 +25,11 @@ const GalleryMain = () => {
     const tabObj = tabs.find((t) => t.name === activeTab);
     if (!tabObj) return;
     setLoading(true);
-    fetchSubfoldersById(tabObj.id).then((subs) => {
+    FolderAPI.fetchSubfoldersById(tabObj.id).then((subs) => {
       setSubfolders(subs);
       Promise.all(
         subs.map(async (sf) => {
-          const images = await fetchCloudinaryImagesById(sf.id);
+          const images = await MediaAPI.fetchImagesByFolderId(sf.id);
           return { id: sf.id, images };
         })
       ).then((results) => {
@@ -38,7 +37,6 @@ const GalleryMain = () => {
         results.forEach(({ id, images }) => {
           imgMap[id] = images;
         });
-        console.log(imgMap);
         setImagesBySubfolder(imgMap);
         setLoading(false);
       });
@@ -53,14 +51,14 @@ const GalleryMain = () => {
       <div className="min-h-screen">
         {/* Tabs here */}
         {tabs.length > 0 && (
-          <div className="relative px-6 md:px-10 py-10 flex justify-start border-b-0 border-mainText">
+          <div className="relative px-6 md:px-10 py-10 flex justify-start border-b-0 border-borderColor">
             <div className="flex gap-x-12 z-10 flex-wrap">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
-                  className={`px-1 pb-1 transition-all uppercase duration-300 tracking-wider font-barlow border-b hover:border-mainText hover:text-mainText text-base truncate max-w-xs mb-4 ${
+                  className={`px-1 pb-1 transition-all uppercase duration-300 tracking-wider font-barlow border-b hover:border-borderColor hover:text-mainText text-base truncate max-w-xs mb-4 ${
                     activeTab === tab.name
-                      ? "text-mainText border-mainText"
+                      ? "text-mainText border-borderColor"
                       : "border-transparent text-gray-400"
                   }`}
                   onClick={() => setActiveTab(tab.name)}
@@ -73,7 +71,6 @@ const GalleryMain = () => {
             </div>
           </div>
         )}
-        {/* Subfolder cards */}
         <SubfolderCards
           loading={loading}
           subfolders={subfolders}

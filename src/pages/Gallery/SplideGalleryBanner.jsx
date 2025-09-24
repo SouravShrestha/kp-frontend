@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Splide from "@splidejs/splide";
 import { Grid } from "@splidejs/splide-extension-grid";
-import { fetchCloudinaryImages } from "../../apis/cloudinary";
+import { MediaAPI } from "../../apis";
 import "@splidejs/splide/dist/css/splide.min.css";
 
 const CLOUDINARY_FOLDER = "kp-gallery-banner";
@@ -11,7 +11,7 @@ const SplideGalleryBanner = () => {
   const [images, setImages] = useState([]);
 
   useEffect(() => {
-    fetchCloudinaryImages(CLOUDINARY_FOLDER)
+    MediaAPI.fetchImagesByFolderName(CLOUDINARY_FOLDER)
       .then(data => setImages(Array.isArray(data) ? data.map(item => item.cloudinary_image_url) : []))
       .catch(() => setImages([]));
   }, []);
@@ -58,19 +58,21 @@ const SplideGalleryBanner = () => {
   }, [images]);
 
   return (
-    <div className="w-full h-full min-h-[32rem] border-mainText border-b-0">
+    <div className="w-full h-full min-h-[32rem] border-borderColor border-b-0">
       <div className="splide" ref={splideRef}>
         <div className="splide__track">
           <ul className="splide__list">
-            {images.map((img, idx) => (
-              <li className="splide__slide" key={idx}>
-                <img
-                  src={img}
-                  alt={`Gallery Banner ${idx + 1}`}
-                  className="object-cover h-64 w-full"
-                />
-              </li>
-            ))}
+            {images.map((img, idx) => 
+              img ? (
+                <li className="splide__slide" key={idx}>
+                  <img
+                    src={img}
+                    alt={`Gallery Banner ${idx + 1}`}
+                    className="object-cover h-64 w-full"
+                  />
+                </li>
+              ) : null
+            )}
           </ul>
         </div>
       </div>

@@ -1,24 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import texts from "../../resources/texts";
-import { sendContactEmail } from "../../apis/email";
+import { CommunicationAPI } from "../../apis";
 
 const MAX_MESSAGE_LENGTH = 300;
 
 const ContactForm = () => {
+  const [searchParams] = useSearchParams();
   const [form, setForm] = useState({
     name: "",
     email: "",
     phone: "",
-    message: ""
+    message: "",
   });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const packageName = searchParams.get("package");
+    if (packageName) {
+      const prefilledMessage = `I would like to enquire about ${packageName} package.`;
+      setForm((prev) => ({ ...prev, message: prefilledMessage }));
+    }
+  }, [searchParams]);
+
   const validateField = (name, value, forceRequired = false) => {
     switch (name) {
       case "name":
-        if (!value.trim()) return (forceRequired || touched.name) ? "Name is required." : "";
+        if (!value.trim())
+          return forceRequired || touched.name ? "Name is required." : "";
         return "";
       case "email":
         if (value.trim()) {
@@ -27,13 +38,18 @@ const ContactForm = () => {
         }
         return "";
       case "phone":
-        if (!value.trim()) return (forceRequired || touched.phone) ? "Phone number is required." : "";
+        if (!value.trim())
+          return forceRequired || touched.phone
+            ? "Phone number is required."
+            : "";
         const phoneDigits = value.replace(/[^\d]/g, "");
         if (phoneDigits.length < 7) return "Enter a valid phone number.";
         return "";
       case "message":
-        if (!value.trim()) return (forceRequired || touched.message) ? "Message is required." : "";
-        if (value.length > MAX_MESSAGE_LENGTH) return `Message must be under ${MAX_MESSAGE_LENGTH} characters.`;
+        if (!value.trim())
+          return forceRequired || touched.message ? "Message is required." : "";
+        if (value.length > MAX_MESSAGE_LENGTH)
+          return `Message must be under ${MAX_MESSAGE_LENGTH} characters.`;
         return "";
       default:
         return "";
@@ -74,16 +90,16 @@ const ContactForm = () => {
     if (Object.keys(validationErrors).length === 0 && !loading) {
       setLoading(true);
       try {
-        const result = await sendContactEmail(form);
+        const result = await CommunicationAPI.sendEmail(form);
         if (result.success) {
-          alert('Your response was submitted successfully!');
+          alert("Your response was submitted successfully!");
           setForm({ name: "", email: "", phone: "", message: "" });
           setTouched({});
         } else {
-          alert('Failed to send email: ' + (result.error || 'Unknown error'));
+          alert("Failed to send email: " + (result.error || "Unknown error"));
         }
       } catch (err) {
-        alert('Failed to send email: ' + err.message);
+        alert("Failed to send email: " + err.message);
       } finally {
         setLoading(false);
       }
@@ -91,8 +107,8 @@ const ContactForm = () => {
   };
 
   return (
-  <form className="flex flex-col gap-6 mt-8 w-full" onSubmit={handleSubmit}>
-  <label className="flex flex-col gap-1 font-ttjenevers">
+    <form className="flex flex-col gap-6 mt-8 w-full" onSubmit={handleSubmit}>
+      <label className="flex flex-col gap-1 font-ttjenevers">
         <div className="flex flex-row justify-between items-center w-full">
           <span>{texts.footer.form.name}</span>
           {errors.name && (
@@ -102,7 +118,7 @@ const ContactForm = () => {
           )}
         </div>
         <input
-          className="border-mainText bg-[#ede7df] outline-none py-2 font-barlow px-3 mt-2"
+          className="border-borderColor bg-[#ede7df] outline-none py-2 font-almarai px-3 mt-2"
           type="text"
           name="name"
           value={form.name}
@@ -111,7 +127,7 @@ const ContactForm = () => {
           disabled={loading}
         />
       </label>
-  <label className="flex flex-col gap-1 font-ttjenevers">
+      <label className="flex flex-col gap-1 font-ttjenevers">
         <div className="flex flex-row justify-between items-center w-full">
           <span>{texts.footer.form.email}</span>
           {errors.email && (
@@ -121,7 +137,7 @@ const ContactForm = () => {
           )}
         </div>
         <input
-          className="border-mainText bg-[#ede7df] outline-none py-2 font-barlow px-3 mt-2"
+          className="border-borderColor bg-[#ede7df] outline-none py-2 font-almarai px-3 mt-2"
           type="email"
           name="email"
           value={form.email}
@@ -130,7 +146,7 @@ const ContactForm = () => {
           disabled={loading}
         />
       </label>
-  <label className="flex flex-col gap-1 font-ttjenevers">
+      <label className="flex flex-col gap-1 font-ttjenevers">
         <div className="flex flex-row justify-between items-center w-full">
           <span>{texts.footer.form.phone}</span>
           {errors.phone && (
@@ -140,7 +156,7 @@ const ContactForm = () => {
           )}
         </div>
         <input
-          className="border-mainText bg-[#ede7df] outline-none py-2 font-barlow px-3 mt-2"
+          className="border-borderColor bg-[#ede7df] outline-none py-2 font-almarai px-3 mt-2"
           type="tel"
           name="phone"
           value={form.phone}
@@ -149,7 +165,7 @@ const ContactForm = () => {
           disabled={loading}
         />
       </label>
-  <label className="flex flex-col gap-1 font-ttjenevers">
+      <label className="flex flex-col gap-1 font-ttjenevers">
         <div className="flex flex-row justify-between items-center w-full">
           <span>{texts.footer.form.message}</span>
           {errors.message && (
@@ -159,7 +175,7 @@ const ContactForm = () => {
           )}
         </div>
         <textarea
-          className="border-mainText bg-[#ede7df] outline-none py-2 resize-none font-barlow px-3 mt-2"
+          className="border-borderColor bg-[#ede7df] outline-none py-2 resize-none font-almarai px-3 mt-2"
           rows={4}
           name="message"
           value={form.message}
@@ -175,7 +191,7 @@ const ContactForm = () => {
       </label>
       <button
         type="submit"
-        className="border border-mainText px-8 py-2 mt-2 w-fit self-end font-ttjenevers bg-white hover:underline disabled:opacity-60 disabled:cursor-not-allowed"
+        className="border border-borderColor px-8 py-2 mt-2 w-fit self-end font-barlow tracking-wider bg-white hover:underline disabled:opacity-60 disabled:cursor-not-allowed"
         disabled={loading}
       >
         {loading ? "Sending..." : texts.footer.form.submit}

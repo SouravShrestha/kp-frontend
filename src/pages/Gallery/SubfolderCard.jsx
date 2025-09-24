@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { formatEventDate } from "../../utils/dateUtils";
 
 const SubfolderCard = ({ sf, images, reverse = false }) => {
   const navigate = useNavigate();
@@ -9,7 +10,6 @@ const SubfolderCard = ({ sf, images, reverse = false }) => {
       setIsReverse(window.innerWidth < 768 ? true : reverse);
     };
     window.addEventListener('resize', handleResize);
-    // Set on mount
     handleResize();
     return () => window.removeEventListener('resize', handleResize);
   }, [reverse]);
@@ -20,28 +20,7 @@ const SubfolderCard = ({ sf, images, reverse = false }) => {
     navigate(`/gallery/${b64Path}`);
   };
 
-  let eventDateStr = "";
-  if (sf.event_date) {
-    const match = sf.event_date.match(/^(\d{2})-(\d{2})-(\d{4})$/);
-    if (match) {
-      const [, day, month, year] = match;
-      const dateObj = new Date(`${year}-${month}-${day}`);
-      eventDateStr = dateObj.toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-    } else {
-      eventDateStr = new Date(sf.event_date).toLocaleDateString(
-        "en-GB",
-        {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }
-      );
-    }
-  }
+  const eventDateStr = formatEventDate(sf.event_date);
 
   // Responsive grid areas
   const gridTemplateAreas = !isReverse
@@ -69,7 +48,7 @@ const SubfolderCard = ({ sf, images, reverse = false }) => {
       {isReverse && (
         <div className="flex flex-col items-center justify-center w-full h-20 md:w-28 transition-all duration-300 md:h-[518px] bg-[#e1ddd4]/80">
           <div className="transform md:-rotate-90 flex flex-col items-center justify-center w-[518px] h-10">
-            <span className="md:group-hover:border-mainText border-b border-transparent transition-all duration-300 text-lg md:text-xl text-mainText font-barlow tracking-widest uppercase">
+            <span className="md:group-hover:border-borderColor border-b border-transparent transition-all duration-300 text-lg md:text-xl text-mainText font-barlow tracking-wide uppercase">
               {sf.event_name}
             </span>
             <span className="text-base text-mainText mt-1 md:mt-2">
@@ -98,16 +77,18 @@ const SubfolderCard = ({ sf, images, reverse = false }) => {
               : {}),
           }}
         >
-          {others.map((img, idx) => (
-            <img
-              key={idx}
-              src={img.cloudinary_image_url}
-              alt={`other-${idx + 1}`}
-              className="w-full h-[256px] object-cover"
-              style={{ gridArea: areaNames[idx] }}
-            />
-          ))}
-          {cover && (
+          {others.map((img, idx) => 
+            img.cloudinary_image_url ? (
+              <img
+                key={idx}
+                src={img.cloudinary_image_url}
+                alt={`other-${idx + 1}`}
+                className="w-full h-[256px] object-cover"
+                style={{ gridArea: areaNames[idx] }}
+              />
+            ) : null
+          )}
+          {cover && cover.cloudinary_image_url && (
             <img
               src={cover.cloudinary_image_url}
               alt="cover"
@@ -120,7 +101,7 @@ const SubfolderCard = ({ sf, images, reverse = false }) => {
       {!isReverse && (
         <div className="flex flex-col items-center justify-center w-full h-20 md:w-28 transition-all duration-300 md:h-[518px] bg-[#e1ddd4]/80">
           <div className="transform md:rotate-90 flex flex-col items-center justify-center w-[518px] h-10">
-            <span className="transition-all duration-300 text-lg md:text-xl text-mainText font-barlow tracking-widest uppercase md:group-hover:border-mainText border-b border-transparent">
+            <span className="transition-all duration-300 text-lg md:text-xl text-mainText font-barlow tracking-wide uppercase md:group-hover:border-borderColor border-b border-transparent">
               {sf.event_name}
             </span>
             <span className="text-base text-mainText mt-1 md:mt-2">

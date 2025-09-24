@@ -5,7 +5,7 @@ import texts from "../resources/texts";
 
 const MovingTextBanner = () => (
   <div
-    className="border-t border-b border-mainText overflow-hidden relative"
+    className="border-t border-b border-borderColor overflow-hidden relative"
     style={{ height: "48px" }}
   >
     <Marquee

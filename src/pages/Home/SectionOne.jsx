@@ -1,5 +1,7 @@
+import { Link } from "react-router-dom";
 import sectionImage from "../../assets/images/section-images/section-1a.jpg";
 import texts from "../../resources/texts";
+import arrowIcon from "../../assets/icons/arrow.svg";
 
 const SectionOne = () => (
   <section className="w-full flex rg:flex-row md:mt-0 flex-col-reverse flex-1 md:h-[calc(100vh-64px)] mt-4 items-center">
@@ -7,7 +9,7 @@ const SectionOne = () => (
       <img
         src={sectionImage}
         alt="Celebration"
-        className="border-mainText border rg:w-auto w-full h-72 object-cover rg:h-[calc(100vh-64px)]"
+        className="rg:w-auto w-full h-72 object-cover rg:h-[calc(100vh-64px)]"
       />
     </div>
     <div className="flex items-center justify-center h-full w-full md:w-32 rg:flex">
@@ -28,19 +30,21 @@ const SectionOne = () => (
         {texts.sectionOne.subheading}
       </span>
       {/* Full description for md and up */}
-      <span className="mt-8 max-w-xl text-base font-barlow leading-7 hidden md:block">
+      <span className="mt-8 max-w-xl text-base font-almarai leading-7 hidden md:block">
         {texts.sectionOne.description}
       </span>
       {/* Short description for below md */}
-      <span className="mt-8 max-w-xl text-base font-barlow leading-7 block md:hidden">
+      <span className="mt-8 max-w-xl text-base font-almarai leading-8 block tracking-wide md:hidden">
         {texts.sectionOne.descriptionShort}
       </span>
-      <button
-        className="px-6 py-2.5 bg-white text-mainText text-base font-ttjenevers border border-mainText mt-8 hover:underline"
-        style={{ letterSpacing: "0.1em" }}
-      >
-        {texts.sectionOne.button}
-      </button>
+      <div className="w-full flex justify-end md:justify-start my-2 md:mt-5">
+        <Link to="/packages">
+          <button className="mt-8 flex gap-2 text-mainText font-barlow tracking-widest text-base group hover:underline">
+            {texts.sectionOne.button}
+            <img src={arrowIcon} alt="arrow" className="w-6 h-6" />
+          </button>
+        </Link>
+      </div>
     </div>
   </section>
 );

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import menuIcon from "../assets/icons/menu.png";
+import logoIcon from "../assets/icons/logo.png";
 import SlidingNavbar from "./SlidingNavbar";
 
 const Navbar = () => {
@@ -33,20 +34,34 @@ const Navbar = () => {
     <>
       <nav
         ref={navRef}
-        className={`flex items-center justify-between pl-8 py-4 bg-mainBg border-mainText transition-all duration-300 z-50 border-t-0 w-full h-64 ${location.pathname === '/gallery' ? '' : 'border-b-1.5'}`}
+        className={`flex items-center justify-between md:pl-4 bg-mainBg border-borderColor transition-all duration-300 z-50 border-t-0 w-full h-64 ${
+          location.pathname === "/" ? "border-b-1.5" : "border-b-0"
+        }`}
         style={
           isSticky &&
           location.pathname === "/" &&
           typeof window !== "undefined" &&
           window.innerWidth >= 768
             ? {
-                height: "64px",
+                height: "72px",
                 position: "fixed",
               }
-            : { height: "64px" }
+            : { height: "72px" }
         }
       >
-        <h1 className="text-3xl font-meysha text-mainText">Kriva pictures</h1>
+        <Link to="/">
+          <div className="flex items-center gap-2.5 h-9 ml-8">
+            <img
+              src={logoIcon}
+              alt="Kriva Pictures Logo"
+              className="h-[29px] w-auto md:h-9"
+            />
+            <div className="md:h-10 h-9 flex flex-col justify-around leading-none">
+              <span className="font-barlow text-sm tracking-wide leading-none">KRIVA PICTURES</span>
+              <span className="block text-[10.5px] font-almarai tracking-wide leading-none">PHOTOGRAPHY</span>
+            </div>
+          </div>
+        </Link>
         <div className="flex items-center">
           <div className="py-4 px-8 gap-8">
             {(() => {
@@ -54,7 +69,6 @@ const Navbar = () => {
                 { href: "/", label: "HOME" },
                 { href: "/gallery", label: "GALLERY" },
                 { href: "/packages", label: "PACKAGES" },
-                { href: "/about", label: "ABOUT" },
                 { href: "/contact", label: "CONTACT" },
               ];
               return (
@@ -65,8 +79,8 @@ const Navbar = () => {
                         to={link.href}
                         className={`hover:text-mainText transition-all duration-200 ${
                           location.pathname === link.href
-                            ? "border-b border-mainText"
-                            : "hover:border-b border-mainText"
+                            ? "border-b border-borderColor"
+                            : "hover:border-b border-borderColor"
                         }`}
                         style={{ paddingBottom: "4px" }}
                       >
@@ -79,8 +93,8 @@ const Navbar = () => {
             })()}
           </div>
           <div
-            className="px-8 flex items-center border-l-0 border-mainText cursor-pointer"
-            style={{ height: "64px" }}
+            className="px-8 flex items-center border-l-0 border-borderColor cursor-pointer"
+            style={{ height: "72px" }}
             onClick={() => setShowMenu(true)}
           >
             <img src={menuIcon} alt="Menu" className="w-4 h-4" />

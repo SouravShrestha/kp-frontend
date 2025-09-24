@@ -21,6 +21,11 @@ html, body {
   src: url('../fonts/ttjenevers.woff') format('woff');
 }
 
+@font-face {
+  font-family: 'Almarai';
+  src: url('../fonts/almarai.woff') format('woff');
+}
+
 @keyframes moveText {
   0% {
     transform: translateX(0);
@@ -33,4 +38,8 @@ html, body {
 .moving-text {
   display: inline-flex;
   animation: moveText 18s linear infinite;
+}
+
+.splide__spinner {
+  display: none !important;
 }

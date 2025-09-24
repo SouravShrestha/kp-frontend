@@ -25,7 +25,7 @@ const ContactMain = () => {
 
       {/* Top: FAQ */}
       <div className="w-full max-w-3xl mx-auto md:mb-12 mb-6">
-        <div className="font-barlow text-mainText text-base flex flex-row flex-wrap items-center justify-center gap-1">
+        <div className="font-almarai text-mainText text-base flex flex-row flex-wrap items-center justify-center gap-1">
           <span>
             Have questions? We may have your answer in our FAQ section. Take a quick look{' '}
             <Link to="/faq" className="underline hover:text-mainText inline">
@@ -38,34 +38,40 @@ const ContactMain = () => {
       {/* Contact Section: Two columns */}
       <div className="w-full max-w-6xl mx-auto flex flex-col-reverse md:flex-row md:mt-8">
         {/* Left: Contact Info */}
-        <div className="w-full md:w-1/3 flex flex-col gap-10 md:p-10 md:border-r border-mainText text-right md:pr-24 pr-0">
+        <div className="w-full md:w-1/3 flex flex-col gap-10 md:p-10 md:border-r border-borderColor text-right md:pr-24 pr-0">
           <div>
             <div className="flex items-center justify-end gap-2 uppercase tracking-wide text-sm mb-2">
               <img src={emailIcon} alt="email" className="w-3 h-3" />
               Email
             </div>
-            <div className="font-barlow text-sm text-mainText">
+            <a 
+              href={`mailto:${texts.footer.email}`}
+              className="font-almarai text-sm text-mainText tracking-wide hover:underline cursor-pointer"
+            >
               {texts.footer.email}
-            </div>
+            </a>
           </div>
           <div>
             <div className="flex items-center justify-end gap-2 uppercase tracking-wide text-sm mb-2">
               <img src={phoneIcon} alt="phone" className="w-3 h-3" />
               Phone
             </div>
-            <div className="font-barlow text-sm text-mainText">
+            <a 
+              href={`tel:${texts.footer.phone}`}
+              className="font-almarai tracking-wide text-sm text-mainText hover:underline cursor-pointer"
+            >
               {texts.footer.phone}
-            </div>
+            </a>
           </div>
           <div>
             <div className="flex items-center justify-end gap-2 uppercase tracking-wide text-sm mb-2">
               <img src={locationIcon} alt="address" className="w-3 h-3" />
               Address
             </div>
-            <div className="font-barlow text-sm text-mainText">
+            <div className="font-almarai tracking-wide text-sm text-mainText">
               {texts.footer.address[0]}
             </div>
-            <div className="font-barlow text-sm text-mainText">
+            <div className="font-almarai tracking-wide text-sm text-mainText">
               {texts.footer.address[1]}
             </div>
           </div>

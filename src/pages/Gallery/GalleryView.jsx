@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import arrowIcon from "../../assets/icons/arrow.svg";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
-import { fetchCloudinaryImagesById } from "../../apis/cloudinary";
-import { getFolderById } from "../../apis/gallery";
+import { MediaAPI, FolderAPI } from "../../apis";
+import { formatEventDate } from "../../utils/dateUtils";
 
 const GalleryView = () => {
   const { folderId } = useParams();
@@ -27,12 +27,12 @@ const GalleryView = () => {
     const fetchData = async () => {
       try {
         var decondedFolderId = decodeURIComponent(atob(folderId));
-        const imgs = await fetchCloudinaryImagesById(decondedFolderId);
+        const imgs = await MediaAPI.fetchImagesByFolderId(decondedFolderId);
         setImages(imgs);
         let event_name = "";
         let event_date = "";
         if (decondedFolderId) {
-          const folder = await getFolderById(decondedFolderId);
+          const folder = await FolderAPI.getFolderById(decondedFolderId);
           if (folder) {
             event_name = folder.event_name || folder.name || "";
             event_date = folder.event_date || folder.date || "";
@@ -53,29 +53,7 @@ const GalleryView = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Format event_date as '20 July 2025' if in '20-07-2025' format
-  let eventDateStr = "";
-  if (eventInfo.event_date) {
-    const match = eventInfo.event_date.match(/^(\d{2})-(\d{2})-(\d{4})$/);
-    if (match) {
-      const [, day, month, year] = match;
-      const dateObj = new Date(`${year}-${month}-${day}`);
-      eventDateStr = dateObj.toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-    } else {
-      eventDateStr = new Date(eventInfo.event_date).toLocaleDateString(
-        "en-GB",
-        {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }
-      );
-    }
-  }
+  let eventDateStr = formatEventDate(eventInfo.event_date);
 
   return (
     <div className="flex flex-col min-h-screen bg-mainBg pb-16">
@@ -83,7 +61,7 @@ const GalleryView = () => {
       <div className="flex flex-col md:flex-row items-center justify-between md:px-8 md:py-6 md:min-h-64">
         <Link
           to="/gallery"
-          className="flex items-center gap-2 md:border-r pr-20 border-mainText hover:underline py-10"
+          className="flex items-center gap-2 md:border-r pr-20 border-borderColor hover:underline py-10"
         >
           <img src={arrowIcon} alt="Back" className="w-8 h-4 rotate-180" />
           <span className="font-ttjenevers text-base tracking-wide ml-4 uppercase">
@@ -94,7 +72,7 @@ const GalleryView = () => {
           <span className="font-meysha font-medium text-4xl md:text-5xl text-center">
             {eventInfo.event_name}
           </span>
-          <span className="text-base mt-4 font-barlow tracking-wide mb-10">
+          <span className="text-base mt-4 font-almarai tracking-wide mb-10">
             {eventDateStr}
           </span>
         </div>
@@ -105,17 +83,19 @@ const GalleryView = () => {
         columnsCountBreakPoints={{ 350: 1, 900: 2, 1400: 3, 1800: 4 }}
       >
         <Masonry gutter="8px">
-          {images.map((img, idx) => (
-            <img
-              key={idx}
-              src={img.cloudinary_image_url}
-              alt={img.displayname || `gallery-img-${idx}`}
-              style={{
-                width: "100%",
-                display: "block",
-              }}
-            />
-          ))}
+          {images.map((img, idx) => 
+            img.cloudinary_image_url ? (
+              <img
+                key={idx}
+                src={img.cloudinary_image_url}
+                alt={img.displayname || `gallery-img-${idx}`}
+                style={{
+                  width: "100%",
+                  display: "block",
+                }}
+              />
+            ) : null
+          )}
         </Masonry>
       </ResponsiveMasonry>
     </div>

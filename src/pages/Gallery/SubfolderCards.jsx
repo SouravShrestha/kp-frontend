@@ -3,7 +3,7 @@ import SubfolderCard from "./SubfolderCard";
 
 const SubfolderCards = ({ loading, subfolders, imagesBySubfolder }) => (
   <div className="flex flex-col mt-1 mb-16 gap-y-12 items-center">
-    {loading && <div className="text-lg">Loading...</div>}
+    {loading && <div className="text-lg">Loading gallery...</div>}
     {!loading &&
       subfolders.map((sf, idx) => (
         <SubfolderCard

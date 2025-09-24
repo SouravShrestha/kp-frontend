@@ -1,7 +1,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
-import { fetchCloudinaryImages } from "../../apis/cloudinary";
+import { MediaAPI } from "../../apis";
 
 const CLOUDINARY_FOLDER = "kp-main-banner";
 
@@ -10,13 +10,13 @@ const SplideBanner = () => {
   const [images, setImages] = useState([]);
 
   useEffect(() => {
-    fetchCloudinaryImages(CLOUDINARY_FOLDER)
+    MediaAPI.fetchImagesByFolderName(CLOUDINARY_FOLDER)
       .then(data => setImages(Array.isArray(data) ? data.map(item => item.cloudinary_image_url) : []))
       .catch(() => setImages([]));
   }, []);
 
   return (
-    <div className="relative flex items-center justify-center w-full h-[calc(70vh)] md:h-[calc(100vh-64px)]">
+    <div className="relative flex items-center justify-center w-full h-[calc(70vh)] md:h-[calc(100vh-72px)]">
       <Splide
         className="splideHome"
         key={images.length}
@@ -41,18 +41,20 @@ const SplideBanner = () => {
             768: { padding: "0%" },
           },
         }}
-        style={{ height: "calc(100vh - 64px)" }}
+        style={{ height: "calc(100vh - 72px)" }}
       >
-        {images.map((img, idx) => (
-          <SplideSlide key={idx}>
-            <img
-              data-splide-lazy={img}
-              alt={`Banner ${idx + 1}`}
-              className="transition-all duration-2000 h-full w-auto object-cover"
-              style={{ height: "calc(100vh - 64px)" }}
-            />
-          </SplideSlide>
-        ))}
+        {images.map((img, idx) => 
+          img ? (
+            <SplideSlide key={idx}>
+              <img
+                data-splide-lazy={img}
+                alt={`Banner ${idx + 1}`}
+                className="transition-all duration-2000 h-full w-auto object-cover"
+                style={{ height: "calc(100vh - 72px)" }}
+              />
+            </SplideSlide>
+          ) : null
+        )}
       </Splide>
     </div>
   );
