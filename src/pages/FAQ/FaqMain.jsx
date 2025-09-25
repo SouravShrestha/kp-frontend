@@ -1,24 +1,40 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ContentAPI } from '../../apis';
+import { useNavigate } from 'react-router-dom';
+import { usePagePreloaderContext } from '../../contexts/PagePreloaderContext';
+import { fetchFaqData } from '../../services/faqService';
+import { createPageNavigationHandler } from '../../utils/navigationUtils';
 import arrowIcon from '../../assets/icons/arrow.svg';
 
 const FaqMain = () => {
+  const navigate = useNavigate();
   const [openItems, setOpenItems] = useState({});
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { getPreloadedData, clearPreloadedData, preloadPageData } = usePagePreloaderContext();
+  
+  const handlePageNavigation = createPageNavigationHandler(preloadPageData, navigate);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    loadFaqs();
-  }, []);
+    
+    // Use preloaded data if available
+    const preloadedData = getPreloadedData("faq");
+    if (preloadedData) {
+      setCategories(preloadedData.categories);
+      setIsLoading(false);
+      setError(null);
+      // Don't clear cache - let it expire naturally for reuse
+    } else {
+      loadFaqs();
+    }
+  }, [getPreloadedData]);
 
   const loadFaqs = async () => {
     try {
       setIsLoading(true);
-      const data = await ContentAPI.fetchFaqs();
-      setCategories(Array.isArray(data) ? data : []);
+      const { categories: data } = await fetchFaqData();
+      setCategories(data);
       setError(null);
     } catch (err) {
       console.error('Error loading FAQs:', err);
@@ -145,13 +161,14 @@ const FaqMain = () => {
             </p>
           </div>
 
-          <Link
-            to="/contact"
-            className="inline-flex items-center px-6 py-2 bg-white border-1.5 border-mainText text-mainText tracking-wider uppercase text-sm hover:underline transition-colors duration-300 font-barlow"
+          <a
+            href="/contact"
+            onClick={(e) => handlePageNavigation(e, "/contact", "contact")}
+            className="inline-flex items-center px-6 py-2 bg-white border-1.5 border-mainText text-mainText tracking-wider uppercase text-sm hover:underline transition-colors duration-300 font-barlow cursor-pointer"
           >
             Contact Us
             <img src={arrowIcon} alt="arrow" className="w-6 h-6 ml-2" />
-          </Link>
+          </a>
         </div>
       </div>
     </div>

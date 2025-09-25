@@ -2,9 +2,15 @@ import PropTypes from "prop-types";
 import "../../assets/styles/index.css";
 import arrowIcon from "../../assets/icons/arrow.svg";
 import { getIcon } from "../../utils/iconMapping";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { usePagePreloaderContext } from "../../contexts/PagePreloaderContext";
+import { createPageNavigationHandler } from "../../utils/navigationUtils";
 
 const PackageCard = ({ pkg }) => {
+  const navigate = useNavigate();
+  const { preloadPageData } = usePagePreloaderContext();
+  
+  const handlePageNavigation = createPageNavigationHandler(preloadPageData, navigate);
   return (
     <div className="w-full">
       <div className="bg-[#ede7df] overflow-hidden">
@@ -37,13 +43,14 @@ const PackageCard = ({ pkg }) => {
                 per session
               </span>
             </div>
-            <Link 
-              to={`/contact?package=${encodeURIComponent(pkg.name)}`}
+            <a 
+              href={`/contact?package=${encodeURIComponent(pkg.name)}`}
+              onClick={(e) => handlePageNavigation(e, `/contact?package=${encodeURIComponent(pkg.name)}`, "contact")}
               className="w-full  bg-white sm:w-auto border-1.5 border-borderColor px-6 py-2 hover:bg-gray-50 cursor-pointer transition-all duration-200 flex items-center justify-center gap-2"
             >
               <span className="text-mainText font-barlow tracking-wide text-lg uppercase">Book YOUR session now</span>
               <img src={arrowIcon} alt="Arrow" className="w-8 h-8" />
-            </Link>
+            </a>
           </div>
           <div className="mt-6 md:mt-8">
             <h3 className="text-xl font-barlow tracking-wide text-mainText mb-4">

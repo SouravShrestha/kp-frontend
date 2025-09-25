@@ -1,11 +1,18 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { usePagePreloaderContext } from "../../contexts/PagePreloaderContext";
+import { createPageNavigationHandler } from "../../utils/navigationUtils";
 import imgA from "../../assets/images/section-images/section-4a.png";
 import imgB from "../../assets/images/section-images/section-4b.png";
 import arrowIcon from "../../assets/icons/arrow.svg";
 import texts from "../../resources/texts";
 
-const SectionFour = () => (
+const SectionFour = () => {
+  const navigate = useNavigate();
+  const { preloadPageData } = usePagePreloaderContext();
+  
+  const handlePageNavigation = createPageNavigationHandler(preloadPageData, navigate);
+
+  return (
   <section className="w-full flex flex-col md:flex-row items-center bg-[#ede7df] -mt-32 border-t border-borderColor justify-between">
     <img
       src={imgB}
@@ -19,12 +26,16 @@ const SectionFour = () => (
           alt="Child in purple dress"
           className="w-56 h-64 object-cover mb-8 md:mb-0 -translate-y-1/2 md:-translate-y-0 rounded-sm md:rounded-none"
         />
-        <Link to="/contact">
+        <a
+          href="/contact"
+          onClick={(e) => handlePageNavigation(e, "/contact", "contact")}
+          className="cursor-pointer"
+        >
           <button className="mt-8 md:flex items-center gap-2 text-mainText font-barlow tracking-widest text-base group hover:underline hidden ">
             {texts.sectionFour.button}
             <img src={arrowIcon} alt="arrow" className="w-6 h-6" />
           </button>
-        </Link>
+        </a>
       </div>
       {/* Center content */}
       <div className="flex flex-col items-center md:items-start text-center md:text-left md:-mt-10 -mt-28">
@@ -46,12 +57,16 @@ const SectionFour = () => (
         ))}
       </div>
       <div className="w-full flex justify-end md:hidden my-2">
-      <Link to="/contact">
+      <a
+        href="/contact"
+        onClick={(e) => handlePageNavigation(e, "/contact", "contact")}
+        className="cursor-pointer"
+      >
         <button className="mt-8 flex gap-2 text-mainText font-barlow tracking-widest text-base group hover:underline md:hidden">
           {texts.sectionFour.button}
           <img src={arrowIcon} alt="arrow" className="w-6 h-6" />
         </button>
-      </Link>
+      </a>
       </div>
     </div>
     {/* Right image */}
@@ -62,6 +77,7 @@ const SectionFour = () => (
       />
     </div>
   </section>
-);
+  );
+};
 
 export default SectionFour;

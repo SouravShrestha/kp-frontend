@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { usePagePreloaderContext } from "../../contexts/PagePreloaderContext";
+import { createPageNavigationHandler } from "../../utils/navigationUtils";
 import fbIcon from "../../assets/icons/fb.png";
 import instaIcon from "../../assets/icons/insta.png";
 import phoneIcon from "../../assets/icons/phone.png";
@@ -9,25 +10,18 @@ import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
 import texts from "../../resources/texts";
 import ContactForm from "./ContactForm";
-import { MediaAPI } from "../../apis";
+import { useCachedBannerImages } from "../../hooks/useCachedBannerImages";
 
 const Footer = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { preloadPageData } = usePagePreloaderContext();
   const isContactPage = location.pathname === "/contact";
 
-  const [images, setImages] = useState([]);
   const CLOUDINARY_FOLDER = "kp-footer-banner";
-  useEffect(() => {
-    MediaAPI.fetchImagesByFolderName(CLOUDINARY_FOLDER)
-      .then((data) =>
-        setImages(
-          Array.isArray(data)
-            ? data.map((item) => item.cloudinary_image_url)
-            : []
-        )
-      )
-      .catch(() => setImages([]));
-  }, []);
+  const { images, loading, error } = useCachedBannerImages(CLOUDINARY_FOLDER);
+  
+  const handlePageNavigation = createPageNavigationHandler(preloadPageData, navigate);
   return (
     <footer className="border-t border-borderColor w-full">
       <div className="flex flex-col w-full">
@@ -77,11 +71,11 @@ const Footer = () => {
                 <hr className="md:ml-20 ml-6 border-borderColor" />
                 {(() => {
                   const footerLinks = [
-                    { to: "/", label: "HOME" },
-                    { to: "/gallery", label: "GALLERY" },
-                    { to: "/packages", label: "PACKAGES" },
-                    { to: "/contact", label: "CONTACT" },
-                    { to: "/faq", label: "FAQ" },
+                    { to: "/", label: "HOME", pageName: "home" },
+                    { to: "/gallery", label: "GALLERY", pageName: "gallery" },
+                    { to: "/packages", label: "PACKAGES", pageName: "packages" },
+                    { to: "/contact", label: "CONTACT", pageName: "contact" },
+                    { to: "/faq", label: "FAQ", pageName: "faq" },
                   ];
                   return (
                     <div
@@ -90,15 +84,16 @@ const Footer = () => {
                       }`}
                     >
                       {footerLinks.map(link => (
-                        <Link
+                        <a
                           key={link.to}
-                          to={link.to}
+                          href={link.to}
+                          onClick={(e) => handlePageNavigation(e, link.to, link.pageName)}
                           className={
-                            `underline-offset-4 w-fit px-2 -mx-2 ${location.pathname === link.to ? 'underline' : ''} hover:underline`
+                            `underline-offset-4 w-fit px-2 -mx-2 cursor-pointer ${location.pathname === link.to ? 'underline' : ''} hover:underline`
                           }
                         >
                           {link.label}
-                        </Link>
+                        </a>
                       ))}
                     </div>
                   );
@@ -147,40 +142,53 @@ const Footer = () => {
         <div>
           {/* Bottom: Gallery */}
           <div className="flex flex-row w-full mt-6 gap-x-2">
-            <Splide
-              key={images.length}
-              options={{
-                type: "loop",
-                start: 0,
-                perPage: 4.5,
-                breakpoints: {
-                  1536: { perPage: 4.5 },
-                  1280: { perPage: 4 },
-                  1024: { perPage: 3.5 },
-                  768: { perPage: 2 },
-                },
-                focus: "center",
-                pauseOnFocus: false,
-                pauseOnHover: false,
-                autoplay: true,
-                interval: 4000,
-                arrows: false,
-                pagination: false,
-                drag: true,
-              }}
-            >
-              {images.map((img, idx) => 
-                img ? (
-                  <SplideSlide key={images.length + idx}>
-                    <img
-                      src={img}
-                      alt={`Banner ${idx + 1}`}
-                      className="object-cover object-center transition-all duration-2000 h-44 w-44 md:h-72 md:w-72 lg:h-72 lg:w-72"
-                    />
-                  </SplideSlide>
-                ) : null
-              )}
-            </Splide>
+            {loading && images.length === 0 ? (
+              <div className="flex items-center justify-center w-full h-44 md:h-72 bg-gray-100">
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400"></div>
+                  <p className="text-gray-500 text-xs font-barlow">Loading gallery...</p>
+                </div>
+              </div>
+            ) : error && images.length === 0 ? (
+              <div className="flex items-center justify-center w-full h-44 md:h-72 bg-gray-100">
+                <p className="text-gray-500 text-xs font-barlow">Gallery unavailable</p>
+              </div>
+            ) : (
+              <Splide
+                key={images.length}
+                options={{
+                  type: "loop",
+                  start: 0,
+                  perPage: 4.5,
+                  breakpoints: {
+                    1536: { perPage: 4.5 },
+                    1280: { perPage: 4 },
+                    1024: { perPage: 3.5 },
+                    768: { perPage: 2 },
+                  },
+                  focus: "center",
+                  pauseOnFocus: false,
+                  pauseOnHover: false,
+                  autoplay: images.length > 1,
+                  interval: 4000,
+                  arrows: false,
+                  pagination: false,
+                  drag: true,
+                }}
+              >
+                {images.map((img, idx) => 
+                  img ? (
+                    <SplideSlide key={images.length + idx}>
+                      <img
+                        src={img}
+                        alt={`Footer Gallery ${idx + 1}`}
+                        className="object-cover object-center transition-all duration-2000 h-44 w-44 md:h-72 md:w-72 lg:h-72 lg:w-72"
+                      />
+                    </SplideSlide>
+                  ) : null
+                )}
+              </Splide>
+            )}
           </div>
           {/* Copyright */}
           <div className="flex flex-col md:flex-row justify-between md:items-center items-center gap-y-2 px-4 py-6 text-xs font-almarai">

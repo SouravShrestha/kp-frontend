@@ -32,7 +32,6 @@ const SectionThree = () => {
   }, [testimonials.length]);
 
   const handleNext = useCallback(() => {
-
     if (testimonials.length === 0) return;
     
     setCurrent((prev) => {

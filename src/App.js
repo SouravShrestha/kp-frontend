@@ -7,6 +7,9 @@ import FaqMain from "./pages/FAQ/FaqMain";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/Navbar";
 import Footer from "./pages/Footer/Footer";
+import LinearLoadingBar from "./components/LinearLoadingBar";
+import CacheDebugger from "./components/CacheDebugger";
+import { PagePreloaderProvider, usePagePreloaderContext } from "./contexts/PagePreloaderContext";
 import "./assets/styles/index.css";
 import {
   BrowserRouter,
@@ -19,9 +22,11 @@ import {
 function AppContent() {
   const location = useLocation();
   const isHome = location.pathname === "/";
+  const { isLoading, progress } = usePagePreloaderContext();
 
   return (
     <div className="bg-mainBg min-h-screen">
+      <LinearLoadingBar isVisible={isLoading} progress={progress} />
       {!isHome && <Navbar />}
       <Routes>
         <Route path="/" element={<HomePage />} />
@@ -33,6 +38,7 @@ function AppContent() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
+      <CacheDebugger />
     </div>
   );
 }
@@ -44,7 +50,9 @@ function App() {
 
   return (
     <RouterType>
-      <AppContent />
+      <PagePreloaderProvider>
+        <AppContent />
+      </PagePreloaderProvider>
     </RouterType>
   );
 }

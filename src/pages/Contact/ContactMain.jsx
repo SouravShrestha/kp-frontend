@@ -6,9 +6,16 @@ import instaIcon from "../../assets/icons/insta.png";
 import texts from "../../resources/texts";
 import ContactForm from "../Footer/ContactForm";
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { usePagePreloaderContext } from "../../contexts/PagePreloaderContext";
+import { createPageNavigationHandler } from "../../utils/navigationUtils";
 
 const ContactMain = () => {
+  const navigate = useNavigate();
+  const { preloadPageData } = usePagePreloaderContext();
+  
+  const handleFaqNavigation = (e) => createPageNavigationHandler(preloadPageData, navigate)(e, "/faq", "faq");
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -28,9 +35,13 @@ const ContactMain = () => {
         <div className="font-almarai text-mainText text-base flex flex-row flex-wrap items-center justify-center gap-1">
           <span>
             Have questions? We may have your answer in our FAQ section. Take a quick look{' '}
-            <Link to="/faq" className="underline hover:text-mainText inline">
+            <a 
+              href="/faq"
+              onClick={handleFaqNavigation}
+              className="underline hover:text-mainText inline cursor-pointer"
+            >
               here!
-            </Link>
+            </a>
           </span>
         </div>
       </div>

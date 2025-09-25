@@ -1,20 +1,14 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Splide from "@splidejs/splide";
 import { Grid } from "@splidejs/splide-extension-grid";
-import { MediaAPI } from "../../apis";
+import { useCachedBannerImages } from "../../hooks/useCachedBannerImages";
 import "@splidejs/splide/dist/css/splide.min.css";
 
 const CLOUDINARY_FOLDER = "kp-gallery-banner";
 
 const SplideGalleryBanner = () => {
-  const [images, setImages] = useState([]);
-
-  useEffect(() => {
-    MediaAPI.fetchImagesByFolderName(CLOUDINARY_FOLDER)
-      .then(data => setImages(Array.isArray(data) ? data.map(item => item.cloudinary_image_url) : []))
-      .catch(() => setImages([]));
-  }, []);
+  const { images, loading, fromCache, cacheInfo, error } = useCachedBannerImages(CLOUDINARY_FOLDER);
 
   const splideRef = useRef(null);
 
@@ -57,8 +51,32 @@ const SplideGalleryBanner = () => {
     }
   }, [images]);
 
+  // Show loading state only if no cached images
+  if (loading && images.length === 0) {
+    return (
+      <div className="w-full h-full min-h-[32rem] border-borderColor border-b-0 flex items-center justify-center bg-gray-100">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          <p className="text-gray-600 font-barlow text-sm">Loading gallery banner...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if no images and there's an error
+  if (error && images.length === 0) {
+    return (
+      <div className="w-full h-full min-h-[32rem] border-borderColor border-b-0 flex items-center justify-center bg-gray-100">
+        <div className="flex flex-col items-center space-y-2">
+          <p className="text-red-600 font-barlow text-sm">Failed to load gallery banner</p>
+          <p className="text-gray-500 text-xs">Please check your connection</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full h-full min-h-[32rem] border-borderColor border-b-0">
+    <div className="w-full h-full min-h-[32rem] border-borderColor border-b-0 relative">
       <div className="splide" ref={splideRef}>
         <div className="splide__track">
           <ul className="splide__list">

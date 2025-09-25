@@ -1,9 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { formatEventDate } from "../../utils/dateUtils";
+import { usePagePreloaderContext } from "../../contexts/PagePreloaderContext";
 
 const SubfolderCard = ({ sf, images, reverse = false }) => {
   const navigate = useNavigate();
+  const { preloadPageData } = usePagePreloaderContext();
   const [isReverse, setIsReverse] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 768 : reverse));
   useEffect(() => {
     const handleResize = () => {
@@ -15,9 +17,32 @@ const SubfolderCard = ({ sf, images, reverse = false }) => {
   }, [reverse]);
   const cover = images.find(img => img.cloudinary_display_name?.startsWith("cover"));
   const others = images.filter(img => !img.cloudinary_display_name?.startsWith("cover")).slice(0, 4);
-  const handleVisitGallery = () => {
+  const handleVisitGallery = async () => {
     const b64Path = btoa(encodeURIComponent(sf.id));
-    navigate(`/gallery/${b64Path}`);
+    const galleryPath = `/gallery/${b64Path}`;
+    
+    // Pass event name and date through navigation state
+    const navigationState = {
+      eventName: sf.event_name,
+      eventDate: sf.event_date,
+      folderId: sf.id
+    };
+    
+    try {
+      // Preload gallery view data with folderId and event info
+      await preloadPageData("gallery-view", { 
+        folderId: b64Path,
+        passedEventInfo: {
+          eventName: sf.event_name,
+          eventDate: sf.event_date
+        }
+      });
+      navigate(galleryPath, { state: navigationState });
+    } catch (error) {
+      console.error("Failed to preload gallery view:", error);
+      // Navigate anyway if preloading fails
+      navigate(galleryPath, { state: navigationState });
+    }
   };
 
   const eventDateStr = formatEventDate(sf.event_date);

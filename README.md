@@ -1,70 +1,186 @@
-# Getting Started with Create React App
+# Kriva Pictures - Photography Portfolio Website
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern, responsive React-based photography portfolio website for Kriva Pictures, specializing in capturing life's most precious moments including weddings, engagements, birthdays, maternity shoots, baby showers, and other celebrations.
 
-## Available Scripts
+## 🌟 Features
 
-In the project directory, you can run:
+- **Multi-page Portfolio**: Showcase different photography services and galleries
+- **Responsive Design**: Optimized for all devices using Tailwind CSS
+- **Dynamic Gallery**: Interactive photo galleries with masonry layout
+- **Contact System**: Integrated contact form for client inquiries
+- **Service Packages**: Detailed photography service offerings
+- **FAQ Section**: Comprehensive answers to common questions
+- **Smooth Animations**: Enhanced user experience with moving text banners and transitions
+
+## 🚀 Live Demo
+
+- **Production**: [https://souravshrestha.github.io/kp-frontend](https://souravshrestha.github.io/kp-frontend)
+- **Backend API**: [https://kp-backend-pfn7.onrender.com](https://kp-backend-pfn7.onrender.com)
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React 19.1.1
+- **Routing**: React Router DOM 7.9.1
+- **Styling**: Tailwind CSS with PostCSS
+- **Image Management**: Cloudinary integration
+- **UI Components**: 
+  - Splide.js for carousels and sliders
+  - React Responsive Masonry for gallery layouts
+  - React Fast Marquee for moving text animations
+- **Build Tool**: Create React App
+- **Deployment**: GitHub Pages
+
+## 📁 Project Structure
+
+```
+src/
+├── App.js                 # Main application component with routing
+├── index.js              # Application entry point
+├── apis/                 # API configuration and services
+│   ├── config.js         # API endpoints and request configuration
+│   ├── index.js          # Main API exports
+│   └── functions/        # API service functions
+│       ├── communication.js  # Contact/email services
+│       ├── content.js    # Content management
+│       ├── folder.js     # Gallery folder operations
+│       └── media.js      # Image/media operations
+├── assets/              # Static assets
+│   ├── fonts/           # Custom font files
+│   ├── icons/           # Icon assets
+│   ├── images/          # Image assets
+│   └── styles/          # CSS styles
+├── components/          # Reusable UI components
+│   ├── MovingTextBanner.jsx  # Animated text banner
+│   ├── Navbar.jsx       # Navigation component
+│   └── SlidingNavbar.jsx     # Mobile navigation
+├── pages/              # Page components
+│   ├── Home/           # Homepage sections and components
+│   ├── Gallery/        # Photo gallery and viewer
+│   ├── Packages/       # Photography service packages
+│   ├── Contact/        # Contact form and information
+│   ├── FAQ/            # Frequently asked questions
+│   ├── Footer/         # Website footer
+│   └── NotFound.jsx    # 404 error page
+├── constants/          # Application constants
+│   └── api.js          # API-related constants
+├── resources/          # Content and text resources
+│   └── texts.js        # Static text content
+└── utils/              # Utility functions
+    ├── dateUtils.js    # Date formatting utilities
+    └── iconMapping.js  # Icon mapping utilities
+```
+
+## 🎯 Key Pages & Features
+
+### Home Page
+- Hero section with image carousel
+- Service overview sections
+- Moving text banner showcasing photography types
+- Call-to-action sections
+
+### Gallery
+- Dynamic photo galleries organized by folders
+- Masonry layout for optimal image display
+- Individual gallery viewer with navigation
+- Cloudinary integration for optimized image delivery
+
+### Packages
+- Detailed photography service offerings
+- Pricing and package information
+- Service comparison features
+
+### Contact
+- Contact form with email integration
+- Business information and location details
+- Social media links
+
+### FAQ
+- Comprehensive frequently asked questions
+- Organized by categories for easy navigation
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn package manager
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/SouravShrestha/kp-frontend.git
+   cd kp-frontend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   Create a `.env` file in the root directory:
+   ```env
+   REACT_APP_API_BASE_URL=your_backend_api_url
+   ```
+
+4. **Start development server**
+   ```bash
+   npm start
+   ```
+   Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+
+## 📜 Available Scripts
 
 ### `npm start`
-
-Runs the app in the development mode.\
-Open [https://kp-backend-pfn7.onrender.com](https://kp-backend-pfn7.onrender.com) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Runs the app in development mode. The page will reload when you make changes.
 
 ### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Launches the test runner in interactive watch mode.
 
 ### `npm run build`
+Builds the app for production to the `build` folder with optimized performance.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### `npm run deploy`
+Deploys the built application to GitHub Pages.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 🌐 API Integration
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+The application connects to a backend API for:
+- **Image Management**: Fetching gallery images and folders
+- **Content Management**: Dynamic content and testimonials  
+- **Contact Forms**: Processing client inquiries
+- **Package Information**: Service details and pricing
+- **FAQ Data**: Dynamic FAQ content
 
-### `npm run eject`
+API endpoints are configured in `src/apis/config.js` with full error handling and loading states.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 🎨 Styling & Design
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- **Tailwind CSS**: Utility-first CSS framework for rapid UI development
+- **Custom Fonts**: Almarai, Barlow, Meysha, and TT Jenevers for unique typography
+- **Responsive Design**: Mobile-first approach ensuring compatibility across all devices
+- **Color Scheme**: Professional photography-focused color palette defined in Tailwind config
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 📱 Browser Compatibility
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+- Mobile browsers (iOS Safari, Chrome Mobile)
 
-## Learn More
+## 🤝 Contributing
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 📞 Support
 
-### Code Splitting
+For support and inquiries, please contact Kriva Pictures through the website's contact form or reach out via the provided social media channels.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 📄 License
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This project is proprietary software owned by Kriva Pictures. All rights reserved.

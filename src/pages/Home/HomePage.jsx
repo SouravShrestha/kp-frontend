@@ -11,6 +11,7 @@ import { useEffect } from "react";
 const HomePage = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
+    // Home page doesn't need to clear cache - let it expire naturally
   }, []);
   return (
     <>

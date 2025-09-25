@@ -1,7 +1,14 @@
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { usePagePreloaderContext } from "../contexts/PagePreloaderContext";
+import { createPageNavigationHandler } from "../utils/navigationUtils";
 
 const NotFound = () => {
+  const navigate = useNavigate();
+  const { preloadPageData } = usePagePreloaderContext();
+  
+  const handlePageNavigation = createPageNavigationHandler(preloadPageData, navigate);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -13,9 +20,13 @@ const NotFound = () => {
         Sorry, the page you are looking for does not exist.
         <br />
         You can go back to the{" "}
-        <Link to="/" className="underline transition-colors underline-offset-4 tracking-wide">
+        <a
+          href="/"
+          onClick={(e) => handlePageNavigation(e, "/", "home")}
+          className="underline transition-colors underline-offset-4 tracking-wide cursor-pointer"
+        >
           homepage
-        </Link>
+        </a>
         .
       </p>
     </div>

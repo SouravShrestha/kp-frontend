@@ -1,9 +1,17 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { usePagePreloaderContext } from "../../contexts/PagePreloaderContext";
+import { createPageNavigationHandler } from "../../utils/navigationUtils";
 import sectionImage from "../../assets/images/section-images/section-1a.jpg";
 import texts from "../../resources/texts";
 import arrowIcon from "../../assets/icons/arrow.svg";
 
-const SectionOne = () => (
+const SectionOne = () => {
+  const navigate = useNavigate();
+  const { preloadPageData } = usePagePreloaderContext();
+  
+  const handlePageNavigation = createPageNavigationHandler(preloadPageData, navigate);
+
+  return (
   <section className="w-full flex rg:flex-row md:mt-0 flex-col-reverse flex-1 md:h-[calc(100vh-64px)] mt-4 items-center">
     <div className="flex items-start rg:items-center justify-center h-72 w-full md:h-auto md:w-auto">
       <img
@@ -38,15 +46,20 @@ const SectionOne = () => (
         {texts.sectionOne.descriptionShort}
       </span>
       <div className="w-full flex justify-end md:justify-start my-2 md:mt-5">
-        <Link to="/packages">
+        <a
+          href="/packages"
+          onClick={(e) => handlePageNavigation(e, "/packages", "packages")}
+          className="cursor-pointer"
+        >
           <button className="mt-8 flex gap-2 text-mainText font-barlow tracking-widest text-base group hover:underline">
             {texts.sectionOne.button}
             <img src={arrowIcon} alt="arrow" className="w-6 h-6" />
           </button>
-        </Link>
+        </a>
       </div>
     </div>
   </section>
-);
+  );
+};
 
 export default SectionOne;

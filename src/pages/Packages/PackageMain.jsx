@@ -1,35 +1,47 @@
 
 import { useEffect, useState, useRef } from "react";
-import { ContentAPI } from "../../apis";
+import { usePagePreloaderContext } from "../../contexts/PagePreloaderContext";
+import { fetchPackagesData } from "../../services/packagesService";
+import { createPageNavigationHandler } from "../../utils/navigationUtils";
 import PackageCard from "./PackageCard";
 import MenuCard from "./MenuCard";
 import arrowIcon from "../../assets/icons/arrow.svg";
 import starIcon from "../../assets/icons/star.png";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const PackageMain = () => {
+  const navigate = useNavigate();
   const [packages, setPackages] = useState([]);
   const [activePackage, setActivePackage] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const topMenuRef = useRef(null);
+  const { getPreloadedData, clearPreloadedData, preloadPageData } = usePagePreloaderContext();
+  
+  const handlePageNavigation = createPageNavigationHandler(preloadPageData, navigate);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    loadPackages();
-  }, []);
+    
+    // Use preloaded data if available
+    const preloadedData = getPreloadedData("packages");
+    if (preloadedData) {
+      setPackages(preloadedData.packages);
+      setActivePackage(preloadedData.activePackage);
+      setIsLoading(false);
+      setError(null);
+      // Don't clear cache - let it expire naturally for reuse
+    } else {
+      loadPackages();
+    }
+  }, [getPreloadedData]);
 
   const loadPackages = async () => {
     try {
       setIsLoading(true);
-      const data = await ContentAPI.fetchPackages();
-      if (data && data.length > 0) {
-        setPackages(data);
-        setActivePackage(data[0]);
-      } else {
-        setPackages([]);
-        setActivePackage(null);
-      }
+      const { packages: data, activePackage: defaultActive } = await fetchPackagesData();
+      setPackages(data);
+      setActivePackage(defaultActive);
       setError(null);
     } catch (err) {
       console.error('Error loading packages:', err);
@@ -64,12 +76,13 @@ const PackageMain = () => {
         </p>
         <p className="text-base sm:text-lg text-mainText font-almarai mt-4">
           For custom quotes and add-ons contact us{" "}
-          <Link
-            to="/contact"
-            className="text-mainText hover:text-mainText underline underline-offset-2 transition-colors duration-200"
+          <a
+            href="/contact"
+            onClick={(e) => handlePageNavigation(e, "/contact", "contact")}
+            className="text-mainText hover:text-mainText underline underline-offset-2 transition-colors duration-200 cursor-pointer"
           >
             here
-          </Link>
+          </a>
         </p>
       </div>
 
@@ -174,12 +187,13 @@ const PackageMain = () => {
               <img src={starIcon} alt="Star" className="h-3 w-3 m mr-2" />
               <p className="text-sm sm:text-base text-mainText font-almarai">
                 For custom quotes and add-ons contact us{" "}
-                <Link
-                  to="/contact"
-                  className="text-mainText hover:text-mainText underline underline-offset-2 transition-colors duration-200"
+                <a
+                  href="/contact"
+                  onClick={(e) => handlePageNavigation(e, "/contact", "contact")}
+                  className="text-mainText hover:text-mainText underline underline-offset-2 transition-colors duration-200 cursor-pointer"
                 >
                   here
-                </Link>
+                </a>
               </p>
             </div>
           </>

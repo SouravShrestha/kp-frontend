@@ -1,5 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { usePagePreloaderContext } from "../contexts/PagePreloaderContext";
+import { createPageNavigationHandler } from "../utils/navigationUtils";
 import menuIcon from "../assets/icons/menu.png";
 import logoIcon from "../assets/icons/logo.png";
 import SlidingNavbar from "./SlidingNavbar";
@@ -9,6 +11,10 @@ const Navbar = () => {
   const location = useLocation();
   const [showMenu, setShowMenu] = useState(false);
   const navRef = useRef(null);
+  const navigate = useNavigate();
+  const { preloadPageData } = usePagePreloaderContext();
+  
+  const handlePageNavigation = createPageNavigationHandler(preloadPageData, navigate);
 
   useEffect(() => {
     if (location.pathname !== "/") {
@@ -49,7 +55,11 @@ const Navbar = () => {
             : { height: "72px" }
         }
       >
-        <Link to="/">
+        <a
+          href="/"
+          onClick={(e) => handlePageNavigation(e, "/", "home")}
+          className="cursor-pointer"
+        >
           <div className="flex items-center gap-2.5 h-9 ml-8">
             <img
               src={logoIcon}
@@ -61,23 +71,24 @@ const Navbar = () => {
               <span className="block text-[10.5px] font-almarai tracking-wide leading-none">PHOTOGRAPHY</span>
             </div>
           </div>
-        </Link>
+        </a>
         <div className="flex items-center">
           <div className="py-4 px-8 gap-8">
             {(() => {
               const navLinks = [
-                { href: "/", label: "HOME" },
-                { href: "/gallery", label: "GALLERY" },
-                { href: "/packages", label: "PACKAGES" },
-                { href: "/contact", label: "CONTACT" },
+                { href: "/", label: "HOME", preload: true, pageName: "home" },
+                { href: "/gallery", label: "GALLERY", preload: true, pageName: "gallery" },
+                { href: "/packages", label: "PACKAGES", preload: true, pageName: "packages" },
+                { href: "/contact", label: "CONTACT", preload: true, pageName: "contact" },
               ];
               return (
                 <ul className="hidden space-x-7 md:flex mdxl:space-x-10 lg:space-x-14 text-mainText font-barlow font-medium tracking-wide text-sm">
                   {navLinks.map((link) => (
                     <li key={link.href}>
-                      <Link
-                        to={link.href}
-                        className={`hover:text-mainText transition-all duration-200 ${
+                      <a
+                        href={link.href}
+                        onClick={(e) => handlePageNavigation(e, link.href, link.pageName)}
+                        className={`hover:text-mainText transition-all duration-200 cursor-pointer ${
                           location.pathname === link.href
                             ? "border-b border-borderColor"
                             : "hover:border-b border-borderColor"
@@ -85,7 +96,7 @@ const Navbar = () => {
                         style={{ paddingBottom: "4px" }}
                       >
                         {link.label}
-                      </Link>
+                      </a>
                     </li>
                   ))}
                 </ul>

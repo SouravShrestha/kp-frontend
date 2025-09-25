@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import texts from "../../resources/texts";
 import { CommunicationAPI } from "../../apis";
@@ -16,6 +16,7 @@ const ContactForm = () => {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [loading, setLoading] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState({ type: "", text: "" });
 
   useEffect(() => {
     const packageName = searchParams.get("package");
@@ -89,17 +90,20 @@ const ContactForm = () => {
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0 && !loading) {
       setLoading(true);
+      setSubmitMessage({ type: "", text: "" });
       try {
         const result = await CommunicationAPI.sendEmail(form);
         if (result.success) {
-          alert("Your response was submitted successfully!");
+          setSubmitMessage({ type: "success", text: "Your message was sent successfully! We'll get back to you soon." });
           setForm({ name: "", email: "", phone: "", message: "" });
           setTouched({});
+          // Clear success message after 5 seconds
+          setTimeout(() => setSubmitMessage({ type: "", text: "" }), 5000);
         } else {
-          alert("Failed to send email: " + (result.error || "Unknown error"));
+          setSubmitMessage({ type: "error", text: "Failed to send message. Please try again." });
         }
       } catch (err) {
-        alert("Failed to send email: " + err.message);
+        setSubmitMessage({ type: "error", text: "Failed to send message. Please check your connection and try again." });
       } finally {
         setLoading(false);
       }
@@ -189,6 +193,18 @@ const ContactForm = () => {
           </span>
         </div>
       </label>
+      
+      {/* Submit Message */}
+      {submitMessage.text && (
+        <div className={`text-sm p-3 rounded border ${
+          submitMessage.type === "success" 
+            ? "bg-green-50 border-green-200 text-green-700" 
+            : "bg-red-50 border-red-200 text-red-700"
+        }`}>
+          {submitMessage.text}
+        </div>
+      )}
+      
       <button
         type="submit"
         className="border border-borderColor px-8 py-2 mt-2 w-fit self-end font-barlow tracking-wider bg-white hover:underline disabled:opacity-60 disabled:cursor-not-allowed"

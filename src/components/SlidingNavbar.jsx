@@ -1,5 +1,6 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { usePagePreloaderContext } from "../contexts/PagePreloaderContext";
+import { createPageNavigationHandler } from "../utils/navigationUtils";
 import img1 from "../assets/images/section-images/section-3a.png";
 import instaIcon from "../assets/icons/insta.png";
 import fbIcon from "../assets/icons/fb.png";
@@ -9,13 +10,22 @@ import texts from "../resources/texts";
 
 const SlidingNavbar = ({ onClose, onMenuItemClick }) => {
   const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+  const navigate = useNavigate();
+  const { preloadPageData } = usePagePreloaderContext();
 
   const navLinks = [
-    { href: '/', label: 'Home' },
-    { href: '/gallery', label: 'Gallery' },
-    { href: '/packages', label: 'Packages' },
-    { href: '/contact', label: 'Contact' },
+    { href: '/', label: 'Home', preload: true, pageName: "home" },
+    { href: '/gallery', label: 'Gallery', preload: true, pageName: "gallery" },
+    { href: '/packages', label: 'Packages', preload: true, pageName: "packages" },
+    { href: '/contact', label: 'Contact', preload: true, pageName: "contact" },
   ];
+
+  const baseNavigationHandler = createPageNavigationHandler(preloadPageData, navigate);
+  
+  const handlePageNavigation = (e, href, pageName) => {
+    onMenuItemClick(); // Close the menu first
+    baseNavigationHandler(e, href, pageName);
+  };
 
   return (
   <div
@@ -50,14 +60,15 @@ const SlidingNavbar = ({ onClose, onMenuItemClick }) => {
       <div className="flex flex-col items-start md:items-end justify-between w-full sm:w-2/4 md:w-1/3 md:p-14 p-8 py-10 relative border-l-1.5 md:border-l-0 border-borderColor mt-12 md:mt-0">
         <nav className="flex flex-col items-start md:items-end justify-center flex-1 gap-y-8">
           {navLinks.map(link => (
-            <Link
-              key={link.href}
-              to={link.href}
-              onClick={onMenuItemClick}
-              className={`font-barlow md:font-ttjenevers text-xl md:text-xl border-b-1.5 hover:border-borderColor ${currentPath === link.href ? 'border-borderColor' : ''}`}
-            >
-              {link.label}
-            </Link>
+            <div key={link.href}>
+              <a
+                href={link.href}
+                onClick={(e) => handlePageNavigation(e, link.href, link.pageName)}
+                className={`font-barlow md:font-ttjenevers text-xl md:text-xl border-b-1.5 hover:border-borderColor cursor-pointer ${currentPath === link.href ? 'border-borderColor' : ''}`}
+              >
+                {link.label}
+              </a>
+            </div>
           ))}
         </nav>
       </div>
