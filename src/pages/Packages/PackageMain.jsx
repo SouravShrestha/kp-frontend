@@ -8,6 +8,8 @@ import MenuCard from "./MenuCard";
 import arrowIcon from "../../assets/icons/arrow.svg";
 import starIcon from "../../assets/icons/star.png";
 import { useNavigate } from "react-router-dom";
+import ImagePlaceholder from "../../components/ImagePlaceholder";
+import packagesIcon from "../../assets/icons/packages.png";
 
 const PackageMain = () => {
   const navigate = useNavigate();
@@ -88,11 +90,8 @@ const PackageMain = () => {
 
       <div className="-auto px-5 md:px-32">
         {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-mainText mx-auto mb-4"></div>
-              <p className="font-almarai text-mainText">Loading packages...</p>
-            </div>
+          <div className="flex w-full bg-colorSecondary justify-center items-center mt-9 md:mt-14 h-[50vh]">
+            <ImagePlaceholder icon={packagesIcon} title="loading packages" />
           </div>
         ) : error ? (
           <div className="text-center py-20">
@@ -106,7 +105,9 @@ const PackageMain = () => {
           </div>
         ) : !packages || packages.length === 0 ? (
           <div className="text-center py-20">
-            <p className="font-almarai text-mainText">No packages available at the moment.</p>
+            <p className="font-almarai text-mainText">
+              No packages available at the moment.
+            </p>
           </div>
         ) : (
           <>
@@ -117,18 +118,18 @@ const PackageMain = () => {
             >
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-3 sm:gap-x-4 mb-8">
                 {packages.map((pkg) => (
-              <MenuCard
-                key={pkg.id || pkg.name}
-                pkg={pkg}
-                isActive={activePackage && activePackage.name === pkg.name}
-                onClick={() => {
-                  setActivePackage(pkg);
-                  scrollToTopMenu();
-                }}
-              />
-            ))}
-          </div>
-        </div>
+                  <MenuCard
+                    key={pkg.id || pkg.name}
+                    pkg={pkg}
+                    isActive={activePackage && activePackage.name === pkg.name}
+                    onClick={() => {
+                      setActivePackage(pkg);
+                      scrollToTopMenu();
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
 
             {/* Navigation Buttons */}
             {activePackage && (
@@ -189,7 +190,9 @@ const PackageMain = () => {
                 For custom quotes and add-ons contact us{" "}
                 <a
                   href="/contact"
-                  onClick={(e) => handlePageNavigation(e, "/contact", "contact")}
+                  onClick={(e) =>
+                    handlePageNavigation(e, "/contact", "contact")
+                  }
                   className="text-mainText hover:text-mainText underline underline-offset-2 transition-colors duration-200 cursor-pointer"
                 >
                   here

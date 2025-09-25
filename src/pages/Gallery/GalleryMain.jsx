@@ -6,7 +6,7 @@ import tabCache from "../../services/tabCache";
 import SubfolderCards from "./SubfolderCards";
 
 const GalleryMain = () => {
-  const [tabs, setTabs] = useState([]);
+  const [tabs, setTabs] = useState([{ id: "all", name: "All" }]);
   const [activeTab, setActiveTab] = useState(null);
   const [subfolders, setSubfolders] = useState([]);
   const [imagesBySubfolder, setImagesBySubfolder] = useState({});
@@ -117,16 +117,20 @@ const GalleryMain = () => {
       <div className="min-h-screen">
         {/* Tabs here */}
         {tabs.length > 0 && (
-          <div className="relative px-6 md:px-10 py-10 flex justify-start border-b-0 border-borderColor">
-            <div className="flex gap-x-12 z-10 flex-wrap">
+          <div className="relative py-8 flex justify-start border-b-0 border-borderColor">
+            <div
+              className={`flex gap-x-12 z-10 w-full flex-wrap px-6 md:px-10 py-2 `}
+            >
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
-                  className={`px-1 pb-1 transition-all uppercase duration-300 tracking-wider font-barlow border-b hover:border-borderColor hover:text-mainText text-base truncate max-w-xs mb-4 ${
+                  className={`px-1 pb-1 transition-all uppercase duration-300 tracking-wider font-barlow border-b hover:border-borderColor hover:text-mainText text-base truncate max-w-xs mb-1 ${
                     activeTab === tab.name
                       ? "text-mainText border-borderColor"
                       : "border-transparent text-gray-400"
-                  }`}
+                  }
+                    ${activeTab === null ? "text-transparent" : "text-mainText"}
+                  `}
                   onClick={() => handleTabChange(tab.name)}
                   title={tab.name}
                 >

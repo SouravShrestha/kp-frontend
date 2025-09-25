@@ -2,6 +2,7 @@
 import { useRef } from "react";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import { useCachedBannerImages } from "../../hooks/useCachedBannerImages";
+import ImagePlaceholder from "../../components/ImagePlaceholder";
 
 const CLOUDINARY_FOLDER = "kp-main-banner";
 
@@ -12,11 +13,8 @@ const SplideBanner = () => {
   // Show loading state only if no cached images
   if (loading && images.length === 0) {
     return (
-      <div className="relative flex items-center justify-center w-full h-[calc(70vh)] md:h-[calc(100vh-72px)] bg-gray-100">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-          <p className="text-gray-600 font-barlow">Loading banner images...</p>
-        </div>
+      <div className="relative flex items-center justify-center w-full h-[calc(70vh)] md:h-[calc(100vh-72px)] bg-colorSecondary">
+        <ImagePlaceholder />
       </div>
     );
   }

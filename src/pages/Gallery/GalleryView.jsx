@@ -7,6 +7,7 @@ import arrowIcon from "../../assets/icons/arrow.svg";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { formatEventDate } from "../../utils/dateUtils";
 import { fetchGalleryViewData, decodeFolderId } from "../../services/galleryViewService";
+import ImagePlaceholder from "../../components/ImagePlaceholder";
 
 const GalleryView = () => {
   const { folderId } = useParams();
@@ -111,26 +112,34 @@ const GalleryView = () => {
         </div>
         <div className="w-40" /> {/* Spacer for symmetry */}
       </div>
-      {/* Masonry Gallery */}
-      <ResponsiveMasonry
-        columnsCountBreakPoints={{ 350: 1, 900: 2, 1400: 3, 1800: 4 }}
-      >
-        <Masonry gutter="8px">
-          {images.map((img, idx) => 
-            img.cloudinary_image_url ? (
-              <img
-                key={idx}
-                src={img.cloudinary_image_url}
-                alt={img.displayname || `gallery-img-${idx}`}
-                style={{
-                  width: "100%",
-                  display: "block",
-                }}
-              />
-            ) : null
-          )}
-        </Masonry>
-      </ResponsiveMasonry>
+      
+      {/* Gallery Content */}
+      {loading ? (
+        <div className="flex justify-center items-center py-20 h-[70vh] bg-colorSecondary">
+          <ImagePlaceholder title="loading gallery" />
+        </div>
+      ) : (
+        /* Masonry Gallery */
+        <ResponsiveMasonry
+          columnsCountBreakPoints={{ 350: 1, 900: 2, 1400: 3, 1800: 4 }}
+        >
+          <Masonry gutter="8px">
+            {images.map((img, idx) => 
+              img.cloudinary_image_url ? (
+                <img
+                  key={idx}
+                  src={img.cloudinary_image_url}
+                  alt={img.displayname || `gallery-img-${idx}`}
+                  style={{
+                    width: "100%",
+                    display: "block",
+                  }}
+                />
+              ) : null
+            )}
+          </Masonry>
+        </ResponsiveMasonry>
+      )}
     </div>
   );
 };

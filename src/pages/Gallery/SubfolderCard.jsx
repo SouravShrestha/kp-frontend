@@ -67,7 +67,7 @@ const SubfolderCard = ({ sf, images, reverse = false }) => {
 
   return (
     <div
-      className="flex flex-col md:flex-row w-full hover:cursor-pointer relative group -mt-4"
+      className="flex flex-col md:flex-row w-full hover:cursor-pointer relative group"
       onClick={handleVisitGallery}
     >
       {isReverse && (
