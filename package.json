@@ -2,7 +2,6 @@
   "name": "kriva-pictures",
   "version": "0.2.0",
   "private": true,
-  "homepage": "https://souravshrestha.github.io/kp-frontend",
   "dependencies": {
     "@splidejs/react-splide": "^0.7.12",
     "@splidejs/splide-extension-grid": "^0.4.1",
@@ -26,8 +25,10 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "predeploy": "npm run build:gh",
+    "deploy": "gh-pages -d build",
+    "build:netlify": "PUBLIC_URL=/ react-scripts build",
+    "build:gh": "PUBLIC_URL=/kp-frontend react-scripts build"
   },
   "eslintConfig": {
     "extends": [
