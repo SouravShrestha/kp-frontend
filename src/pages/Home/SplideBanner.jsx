@@ -1,5 +1,5 @@
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import { useCachedBannerImages } from "../../hooks/useCachedBannerImages";
 import ImagePlaceholder from "../../components/ImagePlaceholder";
@@ -9,19 +9,27 @@ const CLOUDINARY_FOLDER = "kp-main-banner";
 const SplideBanner = () => {
   const splideRef = useRef(null);
   const { images, loading, fromCache, cacheInfo, error } = useCachedBannerImages(CLOUDINARY_FOLDER);
-  const [autoplayInterval, setAutoplayInterval] = useState(500); // Start with fast interval
 
-  // Hack: Start with fast interval (500ms) then change to normal (4000ms) after 500ms
-  // This forces the images to display correctly by triggering an initial quick scroll
+  // Hack: Trigger a small scroll after component mounts and images load
+  // This forces the images to display correctly
   useEffect(() => {
-    if (images.length > 0 && !loading) {
+    if (images.length > 0 && splideRef.current) {
       const timer = setTimeout(() => {
-        setAutoplayInterval(4000); // Change to normal interval after initial fast scroll
-      }, 500);
+        try {
+          const splide = splideRef.current.splide;
+          if (splide) {
+            splide.go('1'); // Move slightly forward
+            setTimeout(() => {
+            }, 200);
+          }
+        } catch (error) {
+          console.log('Splide scroll hack failed:', error);
+        }
+      }, 500); // Small delay to ensure splide is fully initialized
 
       return () => clearTimeout(timer);
     }
-  }, [images.length, loading]);
+  }, [images.length, loading]); // Run when images are loaded
 
   
 
@@ -60,7 +68,7 @@ const SplideBanner = () => {
           pauseOnHover: false,
           padding: "15%",
           autoplay: images.length > 1, // Only autoplay if multiple images
-          interval: autoplayInterval,
+          interval: 4000,
           arrows: false,
           pagination: false,
           drag: true,
