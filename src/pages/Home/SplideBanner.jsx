@@ -62,7 +62,7 @@ const SplideBanner = () => {
         ref={splideRef}
         options={{
           type: "loop",
-          start: 0,
+          start: 1,
           focus: "center",
           pauseOnFocus: false,
           pauseOnHover: false,
