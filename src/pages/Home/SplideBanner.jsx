@@ -1,5 +1,5 @@
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import { useCachedBannerImages } from "../../hooks/useCachedBannerImages";
 import ImagePlaceholder from "../../components/ImagePlaceholder";
@@ -9,27 +9,19 @@ const CLOUDINARY_FOLDER = "kp-main-banner";
 const SplideBanner = () => {
   const splideRef = useRef(null);
   const { images, loading, fromCache, cacheInfo, error } = useCachedBannerImages(CLOUDINARY_FOLDER);
+  const [autoplayInterval, setAutoplayInterval] = useState(500); // Start with fast interval
 
-  // Hack: Trigger a small scroll after component mounts and images load
-  // This forces the images to display correctly
+  // Hack: Start with fast interval (500ms) then change to normal (4000ms) after 500ms
+  // This forces the images to display correctly by triggering an initial quick scroll
   useEffect(() => {
-    if (images.length > 0 && splideRef.current) {
+    if (images.length > 0 && !loading) {
       const timer = setTimeout(() => {
-        try {
-          const splide = splideRef.current.splide;
-          if (splide) {
-            // Move slightly forward then back to current position
-            const currentIndex = splide.index;
-            splide.go('+0.1'); // Move slightly forward
-          }
-        } catch (error) {
-          console.log('Splide scroll hack failed:', error);
-        }
-      }, 200); // Small delay to ensure splide is fully initialized
+        setAutoplayInterval(4000); // Change to normal interval after initial fast scroll
+      }, 500);
 
       return () => clearTimeout(timer);
     }
-  }, [images.length, loading]); // Run when images are loaded
+  }, [images.length, loading]);
 
   
 
@@ -68,7 +60,7 @@ const SplideBanner = () => {
           pauseOnHover: false,
           padding: "15%",
           autoplay: images.length > 1, // Only autoplay if multiple images
-          interval: 4000,
+          interval: autoplayInterval,
           arrows: false,
           pagination: false,
           drag: true,
