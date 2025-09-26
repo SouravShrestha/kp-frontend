@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { usePagePreloaderContext } from "../contexts/PagePreloaderContext";
 import { createPageNavigationHandler } from "../utils/navigationUtils";
 import img1 from "../assets/images/section-images/section-3a.png";
@@ -9,7 +9,8 @@ import crossIcon from "../assets/icons/cross.png";
 import texts from "../resources/texts";
 
 const SlidingNavbar = ({ onClose, onMenuItemClick }) => {
-  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+  const location = useLocation();
+  const currentPath = location.pathname;
   const navigate = useNavigate();
   const { preloadPageData } = usePagePreloaderContext();
 

@@ -1,5 +1,5 @@
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import { useCachedBannerImages } from "../../hooks/useCachedBannerImages";
 import ImagePlaceholder from "../../components/ImagePlaceholder";
@@ -9,6 +9,29 @@ const CLOUDINARY_FOLDER = "kp-main-banner";
 const SplideBanner = () => {
   const splideRef = useRef(null);
   const { images, loading, fromCache, cacheInfo, error } = useCachedBannerImages(CLOUDINARY_FOLDER);
+
+  // Hack: Trigger a small scroll after component mounts and images load
+  // This forces the images to display correctly
+  useEffect(() => {
+    if (images.length > 0 && splideRef.current) {
+      const timer = setTimeout(() => {
+        try {
+          const splide = splideRef.current.splide;
+          if (splide) {
+            // Move slightly forward then back to current position
+            const currentIndex = splide.index;
+            splide.go('+0.1'); // Move slightly forward
+          }
+        } catch (error) {
+          console.log('Splide scroll hack failed:', error);
+        }
+      }, 200); // Small delay to ensure splide is fully initialized
+
+      return () => clearTimeout(timer);
+    }
+  }, [images.length, loading]); // Run when images are loaded
+
+  
 
   // Show loading state only if no cached images
   if (loading && images.length === 0) {
