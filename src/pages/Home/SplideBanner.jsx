@@ -1,5 +1,5 @@
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import { useCachedBannerImages } from "../../hooks/useCachedBannerImages";
 import ImagePlaceholder from "../../components/ImagePlaceholder";
@@ -9,6 +9,17 @@ const CLOUDINARY_FOLDER = "kp-main-banner";
 const SplideBanner = () => {
   const splideRef = useRef(null);
   const { images, loading, fromCache, cacheInfo, error } = useCachedBannerImages(CLOUDINARY_FOLDER);
+
+  // Hack: Scroll banner once on mount to ensure all images load properly
+  useEffect(() => {
+    if (splideRef.current && images.length > 1) {
+      const timeout = setTimeout(() => {
+        splideRef.current.splide.go(1);
+      }, 1000); 
+
+      return () => clearTimeout(timeout);
+    }
+  }, [images.length]);
 
   // Show loading state only if no cached images
   if (loading && images.length === 0) {
@@ -44,18 +55,17 @@ const SplideBanner = () => {
             pauseOnFocus: false,
             pauseOnHover: false,
             autoplay: images.length > 1,
-            interval: 50000,
+            interval: 5000,
             fixedWidth: "100%",
             padding: "10%",
             arrows: false,
             pagination: false,
             drag: true,
-            lazyLoad: "nearby",
             breakpoints: {
-              // 1440: { fixedWidth: "0%" },
-              // 1280: { fixedWidth: "0%" },
-              // 1024: { fixedWidth: "0%" },
-              // 768: { fixedWidth: "0%" },
+              1440: { padding: "15%" },
+              1280: { padding: "5%" },
+              1024: { padding: "0%" },
+              768: { padding: "0%" },
             },
           }}
           style={{ height: "calc(100vh - 72px)" }}
