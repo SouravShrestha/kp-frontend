@@ -18,7 +18,7 @@ const SectionTwo = () => {
   const handlePageNavigation = createPageNavigationHandler(preloadPageData, navigate);
 
   return (
-    <section className="w-full bg-[#ede7df] border-borderColor">
+    <section className="w-full bg-colorSecondary border-borderColor">
       <div className="mx-auto flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-borderColor">
         {texts.sectionTwo.services.map((s, i) => (
           <div key={i} className="flex flex-col items-center px-6 py-10 flex-1">
@@ -28,7 +28,7 @@ const SectionTwo = () => {
                 alt={s.title}
                 className="object-cover mb-8 h-64 md:w-64 rounded-sm relative z-10"
               />
-              <div className="absolute w-full object-cover mb-8 h-64 md:w-64 rounded-sm top-0 bg-colorSecondary">
+              <div className="absolute w-full object-cover mb-8 h-64 md:w-64 rounded-sm top-0 bg-mainBg">
                 <ImagePlaceholder />
               </div>
             </div>
