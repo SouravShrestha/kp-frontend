@@ -4,6 +4,7 @@ import quoteIcon from "../../assets/icons/quote.png";
 import arrowIcon from "../../assets/icons/arrow.svg";
 
 import { ContentAPI } from "../../apis";
+import ImagePlaceholder from "../../components/ImagePlaceholder";
 
 const SectionThree = () => {
   const [testimonials, setTestimonials] = useState([]);
@@ -52,11 +53,16 @@ const SectionThree = () => {
     <section className="w-full border-t border-borderColor flex flex-col items-center justify-center">
       {/* Top image and heading */}
       <div className="w-full flex-col items-center justify-center overflow-hidden relative">
-        <img
-          src={imgA}
-          alt="child and dog"
-          className="object-cover object-center h-[50vh] md:h-auto w-full"
-        />
+        <div className="relative w-full">
+          <img
+            src={imgA}
+            alt="child and dog"
+            className="object-cover object-center h-[50vh] md:h-auto w-full relative z-10"
+          />
+          <div className="h-full w-full top-0 bg-colorSecondary absolute">
+            <ImagePlaceholder />
+          </div>
+        </div>
         <div className="absolute z-10 flex flex-col items-end justify-center pr-12 pt-8 md:top-10 right-5">
           <div className="text-right">
             <span className="block text-white text-5xl font-ttjenevers tracking-wide leading-tight">
@@ -72,7 +78,7 @@ const SectionThree = () => {
 
       {/* Testimonial card */}
       <div className="ml-1/2 w-full px-8 md:px-0 flex flex-1 justify-center -translate-y-1/4 z-30 flex-col">
-        <div className="flex-row flex items-center gap-4 md:gap-8 justify-center">
+        <div className="flex-row flex items-center gap-4 md:gap-8 justify-center w-full">
           <button
             className="md:flex flex-row items-center text-mainText text-lg font-barlow mt-0 hidden"
             onClick={handlePrevious}
@@ -88,9 +94,9 @@ const SectionThree = () => {
               <span className="text-xs tracking-widest font-semibold">EV</span>
             </div>
           </button>
-          <div className="flex flex-col md:flex-row bg-mainBg border border-borderColor max-w-5xl z-30">
+          <div className="flex flex-col md:flex-row bg-mainBg border border-borderColor max-w-5xl z-30 w-full md:h-[422px]">
             {/* Left: Quote */}
-            <div className="flex-1 flex flex-col justify-center md:p-8 p-5 pt-8 border-b md:border-b-0 md:border-r border-borderColor items-center md:items-start">
+            <div className="flex-1 flex flex-col justify-center md:p-8 p-5 pt-8 border-b md:border-b-0 md:border-r border-borderColor items-center md:items-start h-[282px] md:h-[422px]">
               <div className="flex justify-between items-center w-full mb-6">
                 <button
                   className="md:hidden flex flex-row items-center text-mainText text-lg font-barlow mt-0"
@@ -140,16 +146,23 @@ const SectionThree = () => {
               <div className="flex items-center justify-center h-full w-full md:w-16 rg:flex py-4 md:py-0">
                 <span className="text-mainText text-sm md:text-base font-almarai md:absolute tracking-widest md:[transform:rotate(-90deg)] text-center justify-center w-full md:w-fit md:text-start flex gap-x-4 items-center">
                   <span>{testimonial.name}</span>
-                  <span className="border-l border-borderColor py-3"></span>
+                  {testimonial.name && (
+                    <span className="border-l border-borderColor py-3"></span>
+                  )}
                   <span>{testimonial.occasion}</span>
                 </span>
               </div>
               {testimonial.image_url && (
-                <img
-                  src={testimonial.image_url}
-                  alt="testimonial event"
-                  className="w-full md:w-[420px] md:min-w-[420px] object-cover object-center h-[280px] md:h-[420px] border-t md:border-t-0 md:border-l border-borderColor"
-                />
+                <div className="relative w-full md:w-[420px] md:min-w-[420px]">
+                  <img
+                    src={testimonial.image_url}
+                    alt="testimonial event"
+                    className="w-full md:w-[420px] md:min-w-[420px] object-cover object-center h-[280px] md:h-[420px] border-t md:border-t-0 md:border-l border-borderColor z-20 relative"
+                  />
+                  <div className="absolute w-full md:w-[420px] md:min-w-[420px] object-cover object-center h-[280px] md:h-[420px] border-t md:border-t-0 md:border-l border-transparent top-0 z-10 bg-colorSecondary">
+                    <ImagePlaceholder />
+                  </div>
+                </div>
               )}
             </div>
           </div>

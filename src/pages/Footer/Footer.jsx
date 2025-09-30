@@ -11,6 +11,7 @@ import "@splidejs/react-splide/css";
 import texts from "../../resources/texts";
 import ContactForm from "./ContactForm";
 import { useCachedBannerImages } from "../../hooks/useCachedBannerImages";
+import ImagePlaceholder from "../../components/ImagePlaceholder";
 
 const Footer = () => {
   const location = useLocation();
@@ -37,7 +38,9 @@ const Footer = () => {
           )}
           {/* Right: Menu & Contact */}
           <div
-            className={isContactPage ? "w-full" : "md:basis-3/5 grow-0 shrink-0"}
+            className={
+              isContactPage ? "w-full" : "md:basis-3/5 grow-0 shrink-0"
+            }
           >
             <div className="flex flex-col h-full">
               <div className="py-8 md:pl-8 pl-6">
@@ -73,7 +76,11 @@ const Footer = () => {
                   const footerLinks = [
                     { to: "/", label: "HOME", pageName: "home" },
                     { to: "/gallery", label: "GALLERY", pageName: "gallery" },
-                    { to: "/packages", label: "PACKAGES", pageName: "packages" },
+                    {
+                      to: "/packages",
+                      label: "PACKAGES",
+                      pageName: "packages",
+                    },
                     { to: "/contact", label: "CONTACT", pageName: "contact" },
                     { to: "/faq", label: "FAQ", pageName: "faq" },
                   ];
@@ -83,14 +90,16 @@ const Footer = () => {
                         isContactPage ? "w-1/2" : ""
                       }`}
                     >
-                      {footerLinks.map(link => (
+                      {footerLinks.map((link) => (
                         <a
                           key={link.to}
                           href={link.to}
-                          onClick={(e) => handlePageNavigation(e, link.to, link.pageName)}
-                          className={
-                            `underline-offset-4 w-fit px-2 -mx-2 cursor-pointer ${location.pathname === link.to ? 'underline' : ''} hover:underline`
+                          onClick={(e) =>
+                            handlePageNavigation(e, link.to, link.pageName)
                           }
+                          className={`underline-offset-4 w-fit px-2 -mx-2 cursor-pointer ${
+                            location.pathname === link.to ? "underline" : ""
+                          } hover:underline`}
                         >
                           {link.label}
                         </a>
@@ -108,7 +117,7 @@ const Footer = () => {
                 <div className="md:ml-20 ml-8">
                   <div className="flex items-center gap-2 mb-5 font-almarai text-sm tracking-wide">
                     <img src={emailIcon} alt="email" className="w-4 h-4 mr-2" />
-                    <a 
+                    <a
                       href={`mailto:${texts.footer.email}`}
                       className="hover:underline cursor-pointer"
                     >
@@ -117,7 +126,7 @@ const Footer = () => {
                   </div>
                   <div className="flex items-center gap-2 mb-5 font-almarai text-sm tracking-wide">
                     <img src={phoneIcon} alt="phone" className="w-4 h-4 mr-2" />
-                    <a 
+                    <a
                       href={`tel:${texts.footer.phone}`}
                       className="hover:underline cursor-pointer"
                     >
@@ -143,15 +152,14 @@ const Footer = () => {
           {/* Bottom: Gallery */}
           <div className="flex flex-row w-full mt-6 gap-x-2">
             {loading && images.length === 0 ? (
-              <div className="flex items-center justify-center w-full h-44 md:h-72 bg-gray-100">
-                <div className="flex flex-col items-center space-y-2">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400"></div>
-                  <p className="text-gray-500 text-xs font-barlow">Loading gallery...</p>
-                </div>
+              <div className="flex items-center justify-center w-full h-44 md:h-72 bg-colorSecondary">
+                <ImagePlaceholder />
               </div>
             ) : error && images.length === 0 ? (
               <div className="flex items-center justify-center w-full h-44 md:h-72 bg-gray-100">
-                <p className="text-gray-500 text-xs font-barlow">Gallery unavailable</p>
+                <p className="text-gray-500 text-xs font-barlow">
+                  Gallery unavailable
+                </p>
               </div>
             ) : (
               <Splide
@@ -176,14 +184,19 @@ const Footer = () => {
                   drag: true,
                 }}
               >
-                {images.map((img, idx) => 
+                {images.map((img, idx) =>
                   img ? (
                     <SplideSlide key={images.length + idx}>
-                      <img
-                        src={img}
-                        alt={`Footer Gallery ${idx + 1}`}
-                        className="object-cover object-center transition-all duration-2000 h-44 w-44 md:h-72 md:w-72 lg:h-72 lg:w-72"
-                      />
+                      <div className="relative">
+                        <img
+                          src={img}
+                          alt={`Footer Gallery ${idx + 1}`}
+                          className="object-cover object-center transition-all duration-2000 h-44 w-44 md:h-72 md:w-72 lg:h-72 lg:w-72 relative z-10"
+                        />
+                        <div className="h-44 w-44 md:h-72 md:w-72 lg:h-72 lg:w-72 absolute top-0 bg-colorSecondary">
+                          <ImagePlaceholder />
+                        </div>
+                      </div>
                     </SplideSlide>
                   ) : null
                 )}

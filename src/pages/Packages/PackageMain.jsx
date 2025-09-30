@@ -17,10 +17,35 @@ const PackageMain = () => {
   const [activePackage, setActivePackage] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [gridCols, setGridCols] = useState(3);
   const topMenuRef = useRef(null);
   const { getPreloadedData, clearPreloadedData, preloadPageData } = usePagePreloaderContext();
   
   const handlePageNavigation = createPageNavigationHandler(preloadPageData, navigate);
+
+  // Calculate grid columns based on screen size
+  useEffect(() => {
+    const calculateGridCols = () => {
+      const width = window.innerWidth;
+      if (width >= 1024) return 5; // lg: grid-cols-5
+      if (width >= 768) return 4;  // md: grid-cols-4
+      if (width >= 640) return 3;  // sm: grid-cols-3
+      return 2; // grid-cols-2
+    };
+
+    const handleResize = () => {
+      setGridCols(calculateGridCols());
+    };
+
+    // Set initial value
+    handleResize();
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -114,9 +139,9 @@ const PackageMain = () => {
             {/* Top Menu - Package List */}
             <div
               ref={topMenuRef}
-              className="sm:mb-8 items-center flex justify-center pt-9 md:pt-14"
+              className="sm:mb-8 items-center flex justify-center pt-9 md:pt-14 flex-1 w-full"
             >
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-3 sm:gap-x-4 mb-8">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-3 sm:gap-x-4 mb-8 w-full">
                 {packages.map((pkg) => (
                   <MenuCard
                     key={pkg.id || pkg.name}
@@ -126,6 +151,7 @@ const PackageMain = () => {
                       setActivePackage(pkg);
                       scrollToTopMenu();
                     }}
+                    gridCols={gridCols}
                   />
                 ))}
               </div>

@@ -23,7 +23,7 @@ const NotFound = () => {
         <a
           href="/"
           onClick={(e) => handlePageNavigation(e, "/", "home")}
-          className="underline transition-colors underline-offset-4 tracking-wide cursor-pointer"
+          className="border-b border-mainText transition-colors tracking-wide cursor-pointer pb-0.5"
         >
           homepage
         </a>

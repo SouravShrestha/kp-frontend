@@ -116,7 +116,7 @@ const GalleryView = () => {
       {/* Gallery Content */}
       {loading ? (
         <div className="flex justify-center items-center py-20 h-[70vh] bg-colorSecondary">
-          <ImagePlaceholder title="loading gallery" />
+          <ImagePlaceholder />
         </div>
       ) : (
         /* Masonry Gallery */
@@ -126,15 +126,20 @@ const GalleryView = () => {
           <Masonry gutter="8px">
             {images.map((img, idx) => 
               img.cloudinary_image_url ? (
-                <img
-                  key={idx}
-                  src={img.cloudinary_image_url}
-                  alt={img.displayname || `gallery-img-${idx}`}
-                  style={{
-                    width: "100%",
-                    display: "block",
-                  }}
-                />
+                <div key={idx} className="relative">
+                  <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-colorSecondary z-0 min-h-32 min-w-64">
+                    <ImagePlaceholder />
+                  </div>
+                  <img
+                    src={img.cloudinary_image_url}
+                    alt={img.displayname || `gallery-img-${idx}`}
+                    className="relative z-10"
+                    style={{
+                      width: "100%",
+                      display: "block",
+                    }}
+                  />
+                </div>
               ) : null
             )}
           </Masonry>

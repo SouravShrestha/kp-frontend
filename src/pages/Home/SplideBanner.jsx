@@ -1,5 +1,5 @@
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import { useCachedBannerImages } from "../../hooks/useCachedBannerImages";
 import ImagePlaceholder from "../../components/ImagePlaceholder";
@@ -9,7 +9,6 @@ const CLOUDINARY_FOLDER = "kp-main-banner";
 const SplideBanner = () => {
   const splideRef = useRef(null);
   const { images, loading, fromCache, cacheInfo, error } = useCachedBannerImages(CLOUDINARY_FOLDER);
-  
 
   // Show loading state only if no cached images
   if (loading && images.length === 0) {
@@ -41,22 +40,22 @@ const SplideBanner = () => {
           ref={splideRef}
           options={{
             type: "loop",
-            start: 1,
             focus: "center",
             pauseOnFocus: false,
             pauseOnHover: false,
-            padding: "15%",
-            autoplay: images.length > 1, // Only autoplay if multiple images
-            interval: 4000,
+            autoplay: images.length > 1,
+            interval: 50000,
+            fixedWidth: "100%",
+            padding: "10%",
             arrows: false,
             pagination: false,
             drag: true,
             lazyLoad: "nearby",
             breakpoints: {
-              1440: { padding: "15%" },
-              1280: { padding: "5%" },
-              1024: { padding: "0%" },
-              768: { padding: "0%" },
+              // 1440: { fixedWidth: "0%" },
+              // 1280: { fixedWidth: "0%" },
+              // 1024: { fixedWidth: "0%" },
+              // 768: { fixedWidth: "0%" },
             },
           }}
           style={{ height: "calc(100vh - 72px)" }}
@@ -64,12 +63,20 @@ const SplideBanner = () => {
           {images.map((img, idx) =>
             img ? (
               <SplideSlide key={idx}>
-                <img
-                  data-splide-lazy={img}
-                  alt={`Banner ${idx + 1}`}
-                  className="transition-all duration-2000 h-full w-auto object-cover"
-                  style={{ height: "calc(100vh - 72px)" }}
-                />
+                <div className="relative">
+                  <img
+                    src={img}
+                    alt={`Banner ${idx + 1}`}
+                    className="transition-all duration-2000 h-full w-full object-cover relative z-10"
+                    style={{ height: "calc(100vh - 72px)" }}
+                  />
+                  <div
+                    className="h-full w-full absolute top-0 bg-colorSecondary border-r border-mainBg"
+                    style={{ height: "calc(100vh - 72px)" }}
+                  >
+                    <ImagePlaceholder />
+                  </div>
+                </div>
               </SplideSlide>
             ) : null
           )}

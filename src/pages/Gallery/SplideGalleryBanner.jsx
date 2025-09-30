@@ -78,14 +78,19 @@ const SplideGalleryBanner = () => {
       <div className="splide" ref={splideRef}>
         <div className="splide__track">
           <ul className="splide__list">
-            {images.map((img, idx) => 
+            {images.map((img, idx) =>
               img ? (
                 <li className="splide__slide" key={idx}>
-                  <img
-                    src={img}
-                    alt={`Gallery Banner ${idx + 1}`}
-                    className="object-cover h-64 w-full"
-                  />
+                  <div className="relative">
+                    <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-colorSecondary">
+                      <ImagePlaceholder />
+                    </div>
+                    <img
+                      src={img}
+                      alt={`Gallery Banner ${idx + 1}`}
+                      className="object-cover h-64 w-full relative"
+                    />
+                  </div>
                 </li>
               ) : null
             )}

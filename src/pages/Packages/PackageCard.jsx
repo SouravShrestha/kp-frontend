@@ -5,6 +5,7 @@ import { getIcon } from "../../utils/iconMapping";
 import { useNavigate } from "react-router-dom";
 import { usePagePreloaderContext } from "../../contexts/PagePreloaderContext";
 import { createPageNavigationHandler } from "../../utils/navigationUtils";
+import ImagePlaceholder from "../../components/ImagePlaceholder";
 
 const PackageCard = ({ pkg }) => {
   const navigate = useNavigate();
@@ -15,14 +16,21 @@ const PackageCard = ({ pkg }) => {
     <div className="w-full">
       <div className="bg-[#ede7df] overflow-hidden">
         <div className="relative">
+          {/* Placeholder - lowest layer */}
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-colorSecondary">
+            <ImagePlaceholder />
+          </div>
+          
           {pkg.image && (
             <img
               src={pkg.image}
               alt={pkg.name}
-              className="w-full h-60 sm:h-72 md:h-[30rem] object-cover"
+              className="relative w-full h-60 sm:h-72 md:h-[30rem] object-cover z-20"
             />
           )}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-6 py-4 sm:px-10 sm:py-6">
+          
+          {/* Backdrop/gradient overlay - middle layer */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-6 py-4 sm:px-10 sm:py-6 z-30">
             <h2 className="text-2xl sm:text-3xl font-meysha text-white mb-2">
               {pkg.name}
             </h2>

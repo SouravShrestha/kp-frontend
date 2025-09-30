@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { formatEventDate } from "../../utils/dateUtils";
 import { usePagePreloaderContext } from "../../contexts/PagePreloaderContext";
+import ImagePlaceholder from "../../components/ImagePlaceholder";
 
 const SubfolderCard = ({ sf, images, reverse = false }) => {
   const navigate = useNavigate();
@@ -102,24 +103,31 @@ const SubfolderCard = ({ sf, images, reverse = false }) => {
               : {}),
           }}
         >
-          {others.map((img, idx) => 
+          {others.map((img, idx) =>
             img.cloudinary_image_url ? (
-              <img
-                key={idx}
-                src={img.cloudinary_image_url}
-                alt={`other-${idx + 1}`}
-                className="w-full h-[256px] object-cover"
-                style={{ gridArea: areaNames[idx] }}
-              />
+              <div className="relative" key={idx} style={{ gridArea: areaNames[idx] }}>
+                <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-colorSecondary z-0">
+                  <ImagePlaceholder />
+                </div>
+                <img
+                  src={img.cloudinary_image_url}
+                  alt={`other-${idx + 1}`}
+                  className="w-full h-[256px] object-cover relative z-10"
+                />
+              </div>
             ) : null
           )}
           {cover && cover.cloudinary_image_url && (
-            <img
-              src={cover.cloudinary_image_url}
-              alt="cover"
-              className="w-full h-[518px] object-cover"
-              style={{ gridArea: "cover" }}
-            />
+            <div className="relative" style={{ gridArea: "cover" }}>
+              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-colorSecondary z-0">
+                <ImagePlaceholder />
+              </div>
+              <img
+                src={cover.cloudinary_image_url}
+                alt="cover"
+                className="w-full h-[518px] object-cover relative z-10"
+              />
+            </div>
           )}
         </div>
       </div>
