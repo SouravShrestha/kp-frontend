@@ -1,49 +1,113 @@
 import SplideGalleryBanner from "./SplideGalleryBanner";
 import { useEffect, useState } from "react";
-import { fetchSubfoldersByName, fetchSubfoldersById } from "../../apis/gallery";
-import { fetchCloudinaryImagesById } from "../../apis/cloudinary";
+import { usePagePreloaderContext } from "../../contexts/PagePreloaderContext";
+import { fetchGalleryData, fetchTabData } from "../../services/galleryService";
+import tabCache from "../../services/tabCache";
 import SubfolderCards from "./SubfolderCards";
 
 const GalleryMain = () => {
-  const [tabs, setTabs] = useState([]);
+  const [tabs, setTabs] = useState([{ id: "all", name: "All" }]);
   const [activeTab, setActiveTab] = useState(null);
   const [subfolders, setSubfolders] = useState([]);
   const [imagesBySubfolder, setImagesBySubfolder] = useState({});
   const [loading, setLoading] = useState(false);
+  const { getPreloadedData } = usePagePreloaderContext();
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+    
+    const initializeGallery = async () => {
+      // Always show loading indicator briefly, even for cached data
+      setLoading(true);
+      
+      // Try to use preloaded data first
+      const preloadedData = getPreloadedData("gallery");
+      
+      if (preloadedData) {
+        // Show brief loading for cached data (minimum 300ms for better UX)
+        const startTime = Date.now();
+        
+        setTabs(preloadedData.tabs);
+        setActiveTab(preloadedData.activeTab);
+        setSubfolders(preloadedData.subfolders);
+        setImagesBySubfolder(preloadedData.imagesBySubfolder);
+        
+        // Ensure minimum loading time for visual feedback
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, 300 - elapsedTime);
+        
+        setTimeout(() => {
+          setLoading(false);
+        }, remainingTime);
+      } else {
+        // Fallback: fetch data if not preloaded
+        try {
+          const galleryData = await fetchGalleryData();
+          setTabs(galleryData.tabs);
+          setActiveTab(galleryData.activeTab);
+          setSubfolders(galleryData.subfolders);
+          setImagesBySubfolder(galleryData.imagesBySubfolder);
+        } catch (error) {
+          console.error("Failed to load gallery data:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
 
-  useEffect(() => {
-    fetchSubfoldersByName("kp-gallery").then((folders) => {
-      setTabs(folders);
-      if (folders.length > 0) setActiveTab(folders[0].name);
-    });
-  }, []);
+    initializeGallery();
+  }, [getPreloadedData]);
 
-  useEffect(() => {
-    const tabObj = tabs.find((t) => t.name === activeTab);
-    if (!tabObj) return;
-    setLoading(true);
-    fetchSubfoldersById(tabObj.id).then((subs) => {
-      setSubfolders(subs);
-      Promise.all(
-        subs.map(async (sf) => {
-          const images = await fetchCloudinaryImagesById(sf.id);
-          return { id: sf.id, images };
-        })
-      ).then((results) => {
-        const imgMap = {};
-        results.forEach(({ id, images }) => {
-          imgMap[id] = images;
-        });
-        console.log(imgMap);
-        setImagesBySubfolder(imgMap);
+  // Handle tab switching with caching
+  const handleTabChange = async (tabName) => {
+    if (tabName === activeTab) return;
+    
+    setActiveTab(tabName);
+    
+    // Check cache first
+    const cachedData = tabCache.get(tabName);
+    if (cachedData) {
+      // Use cached data immediately
+      setSubfolders(cachedData.subfolders);
+      setImagesBySubfolder(cachedData.imagesBySubfolder);
+      
+      // Brief loading for visual feedback
+      setLoading(true);
+      setTimeout(() => setLoading(false), 50);
+      
+      // Fetch fresh data in background
+      setTimeout(async () => {
+        try {
+          const freshData = await fetchTabData(tabs, tabName);
+          tabCache.set(tabName, freshData.subfolders, freshData.imagesBySubfolder);
+          
+          // Update UI if data changed
+          const dataChanged = JSON.stringify(cachedData.imagesBySubfolder) !== JSON.stringify(freshData.imagesBySubfolder);
+          if (dataChanged) {
+            setSubfolders(freshData.subfolders);
+            setImagesBySubfolder(freshData.imagesBySubfolder);
+          }
+        } catch (error) {
+          console.error("Background refresh failed:", error);
+        }
+      }, 100);
+    } else {
+      // No cache: fetch normally
+      setLoading(true);
+      try {
+        const tabData = await fetchTabData(tabs, tabName);
+        setSubfolders(tabData.subfolders);
+        setImagesBySubfolder(tabData.imagesBySubfolder);
+        
+        // Cache the data
+        tabCache.set(tabName, tabData.subfolders, tabData.imagesBySubfolder);
+      } catch (error) {
+        console.error("Failed to load tab data:", error);
+      } finally {
         setLoading(false);
-      });
-    });
-  }, [activeTab, tabs]);
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -53,17 +117,21 @@ const GalleryMain = () => {
       <div className="min-h-screen">
         {/* Tabs here */}
         {tabs.length > 0 && (
-          <div className="relative px-6 md:px-10 py-10 flex justify-start border-b-0 border-mainText">
-            <div className="flex gap-x-12 z-10 flex-wrap">
+          <div className="relative py-8 flex justify-start border-b-0 border-borderColor">
+            <div
+              className={`flex gap-x-12 z-10 w-full flex-wrap px-6 md:px-10 py-2 `}
+            >
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
-                  className={`px-1 pb-1 transition-all uppercase duration-300 tracking-wider font-barlow border-b hover:border-mainText hover:text-mainText text-base truncate max-w-xs mb-4 ${
+                  className={`px-1 pb-1 transition-all uppercase duration-300 tracking-wider font-barlow border-b hover:border-borderColor hover:text-mainText text-base truncate max-w-xs mb-1 ${
                     activeTab === tab.name
-                      ? "text-mainText border-mainText"
+                      ? "text-mainText border-borderColor"
                       : "border-transparent text-gray-400"
-                  }`}
-                  onClick={() => setActiveTab(tab.name)}
+                  }
+                    ${activeTab === null ? "text-transparent" : "text-mainText"}
+                  `}
+                  onClick={() => handleTabChange(tab.name)}
                   title={tab.name}
                 >
                   {tab.name.charAt(0).toUpperCase() +
@@ -73,7 +141,6 @@ const GalleryMain = () => {
             </div>
           </div>
         )}
-        {/* Subfolder cards */}
         <SubfolderCards
           loading={loading}
           subfolders={subfolders}

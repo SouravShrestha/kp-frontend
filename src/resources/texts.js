@@ -7,7 +7,7 @@ const texts = {
     subheading: "We work with you personally to create timeless memories from your most special occasions.",
     description: "Thank you so much for showing interest in our work and considering Kriva Pictures to capture your important milestones! Whether it’s a wedding, engagement, birthday, maternity, baby shower, or any other celebration, our goal is to bring your vision to life and preserve those moments exactly as you imagine them. We truly love photography, and we’re here for you every step of the way to ensure your memories are captured beautifully and cherished forever.",
     descriptionShort: "Thank you so much for showing interest in our work and considering Kriva Pictures to capture your important milestones! We truly love photography, and we’re here for you every step of the way to ensure your memories are captured beautifully and cherished forever.",
-    button: "Our services",
+    button: "EXPLORE ALL SERVICES",
   },
   movingTextBanner: {
     textItems: [
@@ -75,7 +75,7 @@ const texts = {
     instagram: "https://www.instagram.com/kriva_pictures",
     form: {
       name: "Name",
-      email: "Email",
+      email: "Email (optional)",
       phone: "Phone",
       message: "Message",
       submit: "SUBMIT"

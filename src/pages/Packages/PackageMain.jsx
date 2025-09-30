@@ -1,34 +1,235 @@
-import React, { useEffect } from "react";
 
-const PricingMain = () =>{
+import { useEffect, useState, useRef } from "react";
+import { usePagePreloaderContext } from "../../contexts/PagePreloaderContext";
+import { fetchPackagesData } from "../../services/packagesService";
+import { createPageNavigationHandler } from "../../utils/navigationUtils";
+import PackageCard from "./PackageCard";
+import MenuCard from "./MenuCard";
+import arrowIcon from "../../assets/icons/arrow.svg";
+import starIcon from "../../assets/icons/star.png";
+import { useNavigate } from "react-router-dom";
+import ImagePlaceholder from "../../components/ImagePlaceholder";
+import packagesIcon from "../../assets/icons/packages.png";
+
+const PackageMain = () => {
+  const navigate = useNavigate();
+  const [packages, setPackages] = useState([]);
+  const [activePackage, setActivePackage] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [gridCols, setGridCols] = useState(3);
+  const topMenuRef = useRef(null);
+  const { getPreloadedData, clearPreloadedData, preloadPageData } = usePagePreloaderContext();
+  
+  const handlePageNavigation = createPageNavigationHandler(preloadPageData, navigate);
+
+  // Calculate grid columns based on screen size
+  useEffect(() => {
+    const calculateGridCols = () => {
+      const width = window.innerWidth;
+      if (width >= 1024) return 5; // lg: grid-cols-5
+      if (width >= 768) return 4;  // md: grid-cols-4
+      if (width >= 640) return 3;  // sm: grid-cols-3
+      return 2; // grid-cols-2
+    };
+
+    const handleResize = () => {
+      setGridCols(calculateGridCols());
+    };
+
+    // Set initial value
+    handleResize();
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+    
+    // Use preloaded data if available
+    const preloadedData = getPreloadedData("packages");
+    if (preloadedData) {
+      setPackages(preloadedData.packages);
+      setActivePackage(preloadedData.activePackage);
+      setIsLoading(false);
+      setError(null);
+      // Don't clear cache - let it expire naturally for reuse
+    } else {
+      loadPackages();
+    }
+  }, [getPreloadedData]);
+
+  const loadPackages = async () => {
+    try {
+      setIsLoading(true);
+      const { packages: data, activePackage: defaultActive } = await fetchPackagesData();
+      setPackages(data);
+      setActivePackage(defaultActive);
+      setError(null);
+    } catch (err) {
+      console.error('Error loading packages:', err);
+      setError('Failed to load packages. Please try again later.');
+      setPackages([]);
+      setActivePackage(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const scrollToTopMenu = () => {
+    if (topMenuRef.current) {
+      topMenuRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }
+  };
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#ede7df] py-16">
-      <h1 className="text-4xl font-meysha mb-8 text-mainText">Our Pricing</h1>
-      <div className="max-w-2xl w-full bg-white rounded-lg shadow p-8">
-        <h2 className="text-2xl font-barlow mb-4">Wedding Packages</h2>
-        <ul className="list-disc pl-6 mb-6 text-mainText font-barlow">
-          <li>Basic: $1000 - 4 hours coverage, 100 edited photos</li>
-          <li>Standard: $1800 - 8 hours coverage, 250 edited photos, album</li>
-          <li>
-            Premium: $2500 - Full day, 400+ edited photos, album, pre-wedding
-            shoot
-          </li>
-        </ul>
-        <h2 className="text-2xl font-barlow mb-4">Other Services</h2>
-        <ul className="list-disc pl-6 text-mainText font-barlow">
-          <li>Engagement: $500</li>
-          <li>Baby/Maternity: $400</li>
-          <li>Events: $300+</li>
-        </ul>
-        <p className="mt-8 text-sm text-gray-600">
-          Contact us for a custom quote or more details!
+    <div className="min-h-screen bg-mainBg py-8 sm:py-12 lg:py-16">
+      {/* Hero Section */}
+      <div className="text-center max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-meysha text-mainText mb-6 md:mb-12 leading-relaxed">
+          Capture Your Story, Beautifully
+        </h1>
+        <p className="text-base sm:text-lg text-mainText font-almarai max-w-3xl mx-auto leading-7">
+          We get it, life's moments are precious. That's why we've designed
+          flexible photography packages for every occasion. All delivered
+          digitally, beautifully edited, and ready to cherish forever.
         </p>
+        <p className="text-base sm:text-lg text-mainText font-almarai mt-4">
+          For custom quotes and add-ons contact us{" "}
+          <a
+            href="/contact"
+            onClick={(e) => handlePageNavigation(e, "/contact", "contact")}
+            className="text-mainText hover:text-mainText underline underline-offset-2 transition-colors duration-200 cursor-pointer"
+          >
+            here
+          </a>
+        </p>
+      </div>
+
+      <div className="-auto px-5 md:px-32">
+        {isLoading ? (
+          <div className="flex w-full bg-colorSecondary justify-center items-center mt-9 md:mt-14 h-[50vh]">
+            <ImagePlaceholder icon={packagesIcon} title="loading packages" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <p className="font-almarai text-red-600 mb-4">{error}</p>
+            <button
+              onClick={loadPackages}
+              className="px-6 py-2 bg-mainText text-mainBg font-almarai tracking-wide uppercase text-sm hover:opacity-80 transition-opacity duration-300"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : !packages || packages.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="font-almarai text-mainText">
+              No packages available at the moment.
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Top Menu - Package List */}
+            <div
+              ref={topMenuRef}
+              className="sm:mb-8 items-center flex justify-center pt-9 md:pt-14 flex-1 w-full"
+            >
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-3 sm:gap-x-4 mb-8 w-full">
+                {packages.map((pkg) => (
+                  <MenuCard
+                    key={pkg.id || pkg.name}
+                    pkg={pkg}
+                    isActive={activePackage && activePackage.name === pkg.name}
+                    onClick={() => {
+                      setActivePackage(pkg);
+                      scrollToTopMenu();
+                    }}
+                    gridCols={gridCols}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Navigation Buttons */}
+            {activePackage && (
+              <div className="flex justify-between items-center mb-6">
+                <button
+                  onClick={() => {
+                    const currentIndex = packages.findIndex(
+                      (pkg) => pkg.name === activePackage.name
+                    );
+                    const prevIndex =
+                      currentIndex > 0 ? currentIndex - 1 : packages.length - 1;
+                    setActivePackage(packages[prevIndex]);
+                  }}
+                  className="flex items-center justify-center h-12 w-12"
+                >
+                  <img
+                    src={arrowIcon}
+                    alt="Previous"
+                    className=" w-10 h-10 transform rotate-180"
+                  />
+                </button>
+
+                <div className="text-center">
+                  <div className="text-lg text-mainText tracking-wide font-barlow md:text-2xl">
+                    {activePackage.name}
+                  </div>
+                  <div className="text-sm font-almarai md:text-base md:mt-1">
+                    {activePackage.ideal_for}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    const currentIndex = packages.findIndex(
+                      (pkg) => pkg.name === activePackage.name
+                    );
+                    const nextIndex =
+                      currentIndex < packages.length - 1 ? currentIndex + 1 : 0;
+                    setActivePackage(packages[nextIndex]);
+                  }}
+                  className="flex items-center justify-center w-12 h-12"
+                >
+                  <img
+                    src={arrowIcon}
+                    alt="Previous"
+                    className=" w-10 h-10 transform"
+                  />
+                </button>
+              </div>
+            )}
+
+            {/* Package Details */}
+            {activePackage && <PackageCard pkg={activePackage} />}
+
+            <div className="flex justify-end items-center mt-8">
+              <img src={starIcon} alt="Star" className="h-3 w-3 m mr-2" />
+              <p className="text-sm sm:text-base text-mainText font-almarai">
+                For custom quotes and add-ons contact us{" "}
+                <a
+                  href="/contact"
+                  onClick={(e) =>
+                    handlePageNavigation(e, "/contact", "contact")
+                  }
+                  className="text-mainText hover:text-mainText underline underline-offset-2 transition-colors duration-200 cursor-pointer"
+                >
+                  here
+                </a>
+              </p>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
-}
+};
 
-export default PricingMain;
+export default PackageMain;

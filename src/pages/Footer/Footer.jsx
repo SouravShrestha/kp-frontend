@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { usePagePreloaderContext } from "../../contexts/PagePreloaderContext";
+import { createPageNavigationHandler } from "../../utils/navigationUtils";
 import fbIcon from "../../assets/icons/fb.png";
 import instaIcon from "../../assets/icons/insta.png";
 import phoneIcon from "../../assets/icons/phone.png";
@@ -9,32 +10,26 @@ import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
 import texts from "../../resources/texts";
 import ContactForm from "./ContactForm";
-import { fetchCloudinaryImages } from "../../apis/cloudinary";
+import { useCachedBannerImages } from "../../hooks/useCachedBannerImages";
+import ImagePlaceholder from "../../components/ImagePlaceholder";
 
 const Footer = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { preloadPageData } = usePagePreloaderContext();
   const isContactPage = location.pathname === "/contact";
 
-  const [images, setImages] = useState([]);
   const CLOUDINARY_FOLDER = "kp-footer-banner";
-  useEffect(() => {
-    fetchCloudinaryImages(CLOUDINARY_FOLDER)
-      .then((data) =>
-        setImages(
-          Array.isArray(data)
-            ? data.map((item) => item.cloudinary_image_url)
-            : []
-        )
-      )
-      .catch(() => setImages([]));
-  }, []);
+  const { images, loading, error } = useCachedBannerImages(CLOUDINARY_FOLDER);
+  
+  const handlePageNavigation = createPageNavigationHandler(preloadPageData, navigate);
   return (
-    <footer className="border-t border-mainText w-full">
+    <footer className="border-t border-borderColor w-full">
       <div className="flex flex-col w-full">
-        <div className="flex flex-col md:flex-row border-b border-mainText h-full">
+        <div className="flex flex-col md:flex-row border-b border-borderColor h-full">
           {/* Left: Contact Form */}
           {!isContactPage && (
-            <div className="basis-2/5 grow-0 shrink-0 py-12 md:py-8 border-b md:border-b-0 md:border-r border-mainText md:px-12 px-8">
+            <div className="basis-2/5 grow-0 shrink-0 py-12 md:py-8 border-b md:border-b-0 md:border-r border-borderColor md:px-12 px-8">
               <h3 className="font-ttjenevers text-2xl mb-4 mt-2">
                 {texts.footer.bookSession}
               </h3>
@@ -43,7 +38,9 @@ const Footer = () => {
           )}
           {/* Right: Menu & Contact */}
           <div
-            className={isContactPage ? "w-full" : "md:basis-3/5 grow-0 shrink-0"}
+            className={
+              isContactPage ? "w-full" : "md:basis-3/5 grow-0 shrink-0"
+            }
           >
             <div className="flex flex-col h-full">
               <div className="py-8 md:pl-8 pl-6">
@@ -74,31 +71,42 @@ const Footer = () => {
                     </a>
                   </div>
                 </div>
-                <hr className="md:ml-20 ml-6 border-mainText" />
-                <div
-                  className={`grid grid-cols-2 gap-x-8 gap-y-8 font-barlow text-base ml-8 md:ml-20 mt-10 ${
-                    isContactPage ? "w-1/2" : ""
-                  }`}
-                >
-                  <a href="/" className="hover:underline">
-                    HOME
-                  </a>
-                  <a href="/gallery" className="hover:underline">
-                    GALLERY
-                  </a>
-                  <a href="/packages" className="hover:underline">
-                    PACKAGES
-                  </a>
-                  <a href="/about" className="hover:underline">
-                    ABOUT US
-                  </a>
-                  <a href="/contact" className="hover:underline">
-                    CONTACT
-                  </a>
-                  <a href="/faq" className="hover:underline">
-                    FAQ
-                  </a>
-                </div>
+                <hr className="md:ml-20 ml-6 border-borderColor" />
+                {(() => {
+                  const footerLinks = [
+                    { to: "/", label: "HOME", pageName: "home" },
+                    { to: "/gallery", label: "GALLERY", pageName: "gallery" },
+                    {
+                      to: "/packages",
+                      label: "PACKAGES",
+                      pageName: "packages",
+                    },
+                    { to: "/contact", label: "CONTACT", pageName: "contact" },
+                    { to: "/faq", label: "FAQ", pageName: "faq" },
+                  ];
+                  return (
+                    <div
+                      className={`grid grid-cols-2 gap-x-8 gap-y-8 font-barlow tracking-wider text-base ml-8 md:ml-20 mt-10 ${
+                        isContactPage ? "w-1/2" : ""
+                      }`}
+                    >
+                      {footerLinks.map((link) => (
+                        <a
+                          key={link.to}
+                          href={link.to}
+                          onClick={(e) =>
+                            handlePageNavigation(e, link.to, link.pageName)
+                          }
+                          className={`underline-offset-4 w-fit px-2 -mx-2 cursor-pointer ${
+                            location.pathname === link.to ? "underline" : ""
+                          } hover:underline`}
+                        >
+                          {link.label}
+                        </a>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
               <div className="flex-1 p-6 md:p-8 flex md:flex-row justify-start md:justify-end items-start md:items-end md:mb-8 py-12">
                 <div className="font-meysha text-4xl text-right rotate-[-30deg] -ml-4 md:ml-0">
@@ -107,15 +115,25 @@ const Footer = () => {
                   Contact
                 </div>
                 <div className="md:ml-20 ml-8">
-                  <div className="flex items-center gap-2 mb-5 font-barlow text-sm">
+                  <div className="flex items-center gap-2 mb-5 font-almarai text-sm tracking-wide">
                     <img src={emailIcon} alt="email" className="w-4 h-4 mr-2" />
-                    {texts.footer.email}
+                    <a
+                      href={`mailto:${texts.footer.email}`}
+                      className="hover:underline cursor-pointer"
+                    >
+                      {texts.footer.email}
+                    </a>
                   </div>
-                  <div className="flex items-center gap-2 mb-5 font-barlow text-sm">
+                  <div className="flex items-center gap-2 mb-5 font-almarai text-sm tracking-wide">
                     <img src={phoneIcon} alt="phone" className="w-4 h-4 mr-2" />
-                    {texts.footer.phone}
+                    <a
+                      href={`tel:${texts.footer.phone}`}
+                      className="hover:underline cursor-pointer"
+                    >
+                      {texts.footer.phone}
+                    </a>
                   </div>
-                  <div className="flex items-center gap-2 font-barlow text-sm">
+                  <div className="flex items-center gap-2 font-almarai text-sm ">
                     <img
                       src={locationIcon}
                       alt="location"
@@ -133,41 +151,60 @@ const Footer = () => {
         <div>
           {/* Bottom: Gallery */}
           <div className="flex flex-row w-full mt-6 gap-x-2">
-            <Splide
-              key={images.length}
-              options={{
-                type: "loop",
-                start: 0,
-                perPage: 4.5,
-                breakpoints: {
-                  1536: { perPage: 4.5 },
-                  1280: { perPage: 4 },
-                  1024: { perPage: 3.5 },
-                  768: { perPage: 2 },
-                },
-                focus: "center",
-                pauseOnFocus: false,
-                pauseOnHover: false,
-                autoplay: true,
-                interval: 4000,
-                arrows: false,
-                pagination: false,
-                drag: true,
-              }}
-            >
-              {images.map((img, idx) => (
-                <SplideSlide key={images.length + idx}>
-                  <img
-                    src={img}
-                    alt={`Banner ${idx + 1}`}
-                    className="object-cover object-center transition-all duration-2000 h-44 w-44 md:h-72 md:w-72 lg:h-48 lg:w-48"
-                  />
-                </SplideSlide>
-              ))}
-            </Splide>
+            {loading && images.length === 0 ? (
+              <div className="flex items-center justify-center w-full h-44 md:h-72 bg-colorSecondary">
+                <ImagePlaceholder />
+              </div>
+            ) : error && images.length === 0 ? (
+              <div className="flex items-center justify-center w-full h-44 md:h-72 bg-gray-100">
+                <p className="text-gray-500 text-xs font-barlow">
+                  Gallery unavailable
+                </p>
+              </div>
+            ) : (
+              <Splide
+                key={images.length}
+                options={{
+                  type: "loop",
+                  start: 0,
+                  perPage: 4.5,
+                  breakpoints: {
+                    1536: { perPage: 4.5 },
+                    1280: { perPage: 4 },
+                    1024: { perPage: 3.5 },
+                    768: { perPage: 2 },
+                  },
+                  focus: "center",
+                  pauseOnFocus: false,
+                  pauseOnHover: false,
+                  autoplay: images.length > 1,
+                  interval: 4000,
+                  arrows: false,
+                  pagination: false,
+                  drag: true,
+                }}
+              >
+                {images.map((img, idx) =>
+                  img ? (
+                    <SplideSlide key={images.length + idx}>
+                      <div className="relative">
+                        <img
+                          src={img}
+                          alt={`Footer Gallery ${idx + 1}`}
+                          className="object-cover object-center transition-all duration-2000 h-44 w-44 md:h-72 md:w-72 lg:h-72 lg:w-72 relative z-10"
+                        />
+                        <div className="h-44 w-44 md:h-72 md:w-72 lg:h-72 lg:w-72 absolute top-0 bg-colorSecondary">
+                          <ImagePlaceholder />
+                        </div>
+                      </div>
+                    </SplideSlide>
+                  ) : null
+                )}
+              </Splide>
+            )}
           </div>
           {/* Copyright */}
-          <div className="flex flex-col md:flex-row justify-between md:items-center items-end gap-y-2 px-4 py-6 text-xs font-barlow">
+          <div className="flex flex-col md:flex-row justify-between md:items-center items-center gap-y-2 px-4 py-6 text-xs font-almarai">
             <span>© KRIVA PICTURES 2025. ALL RIGHTS RESERVED.</span>
             <span>PHOTOS BY KRIVA PICTURES</span>
           </div>

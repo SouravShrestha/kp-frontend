@@ -1,47 +1,52 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { formatEventDate } from "../../utils/dateUtils";
+import { usePagePreloaderContext } from "../../contexts/PagePreloaderContext";
+import ImagePlaceholder from "../../components/ImagePlaceholder";
 
 const SubfolderCard = ({ sf, images, reverse = false }) => {
   const navigate = useNavigate();
+  const { preloadPageData } = usePagePreloaderContext();
   const [isReverse, setIsReverse] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 768 : reverse));
   useEffect(() => {
     const handleResize = () => {
       setIsReverse(window.innerWidth < 768 ? true : reverse);
     };
     window.addEventListener('resize', handleResize);
-    // Set on mount
     handleResize();
     return () => window.removeEventListener('resize', handleResize);
   }, [reverse]);
   const cover = images.find(img => img.cloudinary_display_name?.startsWith("cover"));
   const others = images.filter(img => !img.cloudinary_display_name?.startsWith("cover")).slice(0, 4);
-  const handleVisitGallery = () => {
+  const handleVisitGallery = async () => {
     const b64Path = btoa(encodeURIComponent(sf.id));
-    navigate(`/gallery/${b64Path}`);
+    const galleryPath = `/gallery/${b64Path}`;
+    
+    // Pass event name and date through navigation state
+    const navigationState = {
+      eventName: sf.event_name,
+      eventDate: sf.event_date,
+      folderId: sf.id
+    };
+    
+    try {
+      // Preload gallery view data with folderId and event info
+      await preloadPageData("gallery-view", { 
+        folderId: b64Path,
+        passedEventInfo: {
+          eventName: sf.event_name,
+          eventDate: sf.event_date
+        }
+      });
+      navigate(galleryPath, { state: navigationState });
+    } catch (error) {
+      console.error("Failed to preload gallery view:", error);
+      // Navigate anyway if preloading fails
+      navigate(galleryPath, { state: navigationState });
+    }
   };
 
-  let eventDateStr = "";
-  if (sf.event_date) {
-    const match = sf.event_date.match(/^(\d{2})-(\d{2})-(\d{4})$/);
-    if (match) {
-      const [, day, month, year] = match;
-      const dateObj = new Date(`${year}-${month}-${day}`);
-      eventDateStr = dateObj.toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-    } else {
-      eventDateStr = new Date(sf.event_date).toLocaleDateString(
-        "en-GB",
-        {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }
-      );
-    }
-  }
+  const eventDateStr = formatEventDate(sf.event_date);
 
   // Responsive grid areas
   const gridTemplateAreas = !isReverse
@@ -63,13 +68,13 @@ const SubfolderCard = ({ sf, images, reverse = false }) => {
 
   return (
     <div
-      className="flex flex-col md:flex-row w-full hover:cursor-pointer relative group -mt-4"
+      className="flex flex-col md:flex-row w-full hover:cursor-pointer relative group"
       onClick={handleVisitGallery}
     >
       {isReverse && (
         <div className="flex flex-col items-center justify-center w-full h-20 md:w-28 transition-all duration-300 md:h-[518px] bg-[#e1ddd4]/80">
           <div className="transform md:-rotate-90 flex flex-col items-center justify-center w-[518px] h-10">
-            <span className="md:group-hover:border-mainText border-b border-transparent transition-all duration-300 text-lg md:text-xl text-mainText font-barlow tracking-widest uppercase">
+            <span className="md:group-hover:border-borderColor border-b border-transparent transition-all duration-300 text-lg md:text-xl text-mainText font-barlow tracking-wide uppercase">
               {sf.event_name}
             </span>
             <span className="text-base text-mainText mt-1 md:mt-2">
@@ -98,29 +103,38 @@ const SubfolderCard = ({ sf, images, reverse = false }) => {
               : {}),
           }}
         >
-          {others.map((img, idx) => (
-            <img
-              key={idx}
-              src={img.cloudinary_image_url}
-              alt={`other-${idx + 1}`}
-              className="w-full h-[256px] object-cover"
-              style={{ gridArea: areaNames[idx] }}
-            />
-          ))}
-          {cover && (
-            <img
-              src={cover.cloudinary_image_url}
-              alt="cover"
-              className="w-full h-[518px] object-cover"
-              style={{ gridArea: "cover" }}
-            />
+          {others.map((img, idx) =>
+            img.cloudinary_image_url ? (
+              <div className="relative" key={idx} style={{ gridArea: areaNames[idx] }}>
+                <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-colorSecondary z-0">
+                  <ImagePlaceholder />
+                </div>
+                <img
+                  src={img.cloudinary_image_url}
+                  alt={`other-${idx + 1}`}
+                  className="w-full h-[256px] object-cover relative z-10"
+                />
+              </div>
+            ) : null
+          )}
+          {cover && cover.cloudinary_image_url && (
+            <div className="relative" style={{ gridArea: "cover" }}>
+              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-colorSecondary z-0">
+                <ImagePlaceholder />
+              </div>
+              <img
+                src={cover.cloudinary_image_url}
+                alt="cover"
+                className="w-full h-[518px] object-cover relative z-10"
+              />
+            </div>
           )}
         </div>
       </div>
       {!isReverse && (
         <div className="flex flex-col items-center justify-center w-full h-20 md:w-28 transition-all duration-300 md:h-[518px] bg-[#e1ddd4]/80">
           <div className="transform md:rotate-90 flex flex-col items-center justify-center w-[518px] h-10">
-            <span className="transition-all duration-300 text-lg md:text-xl text-mainText font-barlow tracking-widest uppercase md:group-hover:border-mainText border-b border-transparent">
+            <span className="transition-all duration-300 text-lg md:text-xl text-mainText font-barlow tracking-wide uppercase md:group-hover:border-borderColor border-b border-transparent">
               {sf.event_name}
             </span>
             <span className="text-base text-mainText mt-1 md:mt-2">

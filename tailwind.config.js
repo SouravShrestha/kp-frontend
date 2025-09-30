@@ -13,6 +13,7 @@ export const theme = {
       meysha: ['Meysha'],
       barlow: ['Barlow'],
       ttjenevers: ['TT Jenevers'],
+      almarai: ['Almarai'],
     },
     borderWidth: {
       '1.5': '1.45px',

@@ -21,16 +21,29 @@ html, body {
   src: url('../fonts/ttjenevers.woff') format('woff');
 }
 
-@keyframes moveText {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(50%);
-  }
+@font-face {
+  font-family: 'Almarai';
+  src: url('../fonts/almarai.woff') format('woff');
 }
 
-.moving-text {
-  display: inline-flex;
-  animation: moveText 18s linear infinite;
+
+
+.splide__spinner {
+  display: none !important;
+}
+  
+.gradient-loader {
+  background: linear-gradient(to right, #3b82f6, #a855f7, #ec4899);
+  background-size: 200% 100%;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: gradient-shimmer 2s infinite;
+}
+
+@keyframes gradient-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }

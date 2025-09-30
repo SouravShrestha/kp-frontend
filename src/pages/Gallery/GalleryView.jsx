@@ -1,15 +1,23 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+
+import { usePagePreloaderContext } from "../../contexts/PagePreloaderContext";
+import { createPageNavigationHandler } from "../../utils/navigationUtils";
 import arrowIcon from "../../assets/icons/arrow.svg";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
-import { fetchCloudinaryImagesById } from "../../apis/cloudinary";
-import { getFolderById } from "../../apis/gallery";
+import { formatEventDate } from "../../utils/dateUtils";
+import { fetchGalleryViewData, decodeFolderId } from "../../services/galleryViewService";
+import ImagePlaceholder from "../../components/ImagePlaceholder";
 
 const GalleryView = () => {
   const { folderId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { preloadPageData, getPreloadedData } = usePagePreloaderContext();
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  const handlePageNavigation = createPageNavigationHandler(preloadPageData, navigate);
 
   const [eventInfo, setEventInfo] = useState({
     event_name: "",
@@ -23,101 +31,120 @@ const GalleryView = () => {
       setLoading(false);
       return;
     }
+    
+    // Check if we have event info passed through navigation state
+    const passedEventInfo = location.state;
+    
     setLoading(true);
-    const fetchData = async () => {
-      try {
-        var decondedFolderId = decodeURIComponent(atob(folderId));
-        const imgs = await fetchCloudinaryImagesById(decondedFolderId);
-        setImages(imgs);
-        let event_name = "";
-        let event_date = "";
-        if (decondedFolderId) {
-          const folder = await getFolderById(decondedFolderId);
-          if (folder) {
-            event_name = folder.event_name || folder.name || "";
-            event_date = folder.event_date || folder.date || "";
-          }
-        }
-        setEventInfo({ event_name, event_date });
-      } catch (e) {
-        setImages([]);
-        setEventInfo({ event_name: "", event_date: "" });
-      } finally {
-        setLoading(false);
+    
+    // First, try to get preloaded data
+    const preloadedData = getPreloadedData("gallery-view", { folderId });
+    
+    if (preloadedData) {
+      // Use preloaded data
+      setImages(preloadedData.images || []);
+      setEventInfo(preloadedData.eventInfo || { event_name: "", event_date: "" });
+      setLoading(false);
+    } else {
+      // Fall back to fetching data
+      if (passedEventInfo && passedEventInfo.eventName && passedEventInfo.eventDate) {
+        setEventInfo({
+          event_name: passedEventInfo.eventName,
+          event_date: passedEventInfo.eventDate
+        });
       }
-    };
-    fetchData();
-  }, []);
+      
+      const fetchData = async () => {
+        try {
+          const { images: imgs, eventInfo: fetchedEventInfo } = await fetchGalleryViewData({
+            folderId,
+            passedEventInfo
+          });
+          
+          setImages(imgs);
+          
+          // Only update event info if we don't have it from navigation state
+          if (!passedEventInfo || !passedEventInfo.eventName || !passedEventInfo.eventDate) {
+            setEventInfo(fetchedEventInfo);
+          }
+        } catch (error) {
+          console.error('Error loading gallery view data:', error);
+          setImages([]);
+          // Only reset event info if we didn't get it from navigation state
+          if (!passedEventInfo || !passedEventInfo.eventName) {
+            setEventInfo({ event_name: "", event_date: "" });
+          }
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchData();
+    }
+  }, [folderId, location.state, getPreloadedData]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Format event_date as '20 July 2025' if in '20-07-2025' format
-  let eventDateStr = "";
-  if (eventInfo.event_date) {
-    const match = eventInfo.event_date.match(/^(\d{2})-(\d{2})-(\d{4})$/);
-    if (match) {
-      const [, day, month, year] = match;
-      const dateObj = new Date(`${year}-${month}-${day}`);
-      eventDateStr = dateObj.toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-    } else {
-      eventDateStr = new Date(eventInfo.event_date).toLocaleDateString(
-        "en-GB",
-        {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }
-      );
-    }
-  }
+  let eventDateStr = formatEventDate(eventInfo.event_date);
 
   return (
     <div className="flex flex-col min-h-screen bg-mainBg pb-16">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-center justify-between md:px-8 md:py-6 md:min-h-64">
-        <Link
-          to="/gallery"
-          className="flex items-center gap-2 md:border-r pr-20 border-mainText hover:underline py-10"
+        <a
+          href="/gallery"
+          onClick={(e) => handlePageNavigation(e, "/gallery", "gallery")}
+          className="flex items-center gap-2 md:border-r pr-20 border-borderColor hover:underline py-10 cursor-pointer"
         >
           <img src={arrowIcon} alt="Back" className="w-8 h-4 rotate-180" />
           <span className="font-ttjenevers text-base tracking-wide ml-4 uppercase">
             Back to all galleries
           </span>
-        </Link>
+        </a>
         <div className="flex-1 flex flex-col items-center md:py-8 mt-4 px-8">
           <span className="font-meysha font-medium text-4xl md:text-5xl text-center">
             {eventInfo.event_name}
           </span>
-          <span className="text-base mt-4 font-barlow tracking-wide mb-10">
+          <span className="text-base mt-4 font-almarai tracking-wide mb-10">
             {eventDateStr}
           </span>
         </div>
         <div className="w-40" /> {/* Spacer for symmetry */}
       </div>
-      {/* Masonry Gallery */}
-      <ResponsiveMasonry
-        columnsCountBreakPoints={{ 350: 1, 900: 2, 1400: 3, 1800: 4 }}
-      >
-        <Masonry gutter="8px">
-          {images.map((img, idx) => (
-            <img
-              key={idx}
-              src={img.cloudinary_image_url}
-              alt={img.displayname || `gallery-img-${idx}`}
-              style={{
-                width: "100%",
-                display: "block",
-              }}
-            />
-          ))}
-        </Masonry>
-      </ResponsiveMasonry>
+      
+      {/* Gallery Content */}
+      {loading ? (
+        <div className="flex justify-center items-center py-20 h-[70vh] bg-colorSecondary">
+          <ImagePlaceholder />
+        </div>
+      ) : (
+        /* Masonry Gallery */
+        <ResponsiveMasonry
+          columnsCountBreakPoints={{ 350: 1, 900: 2, 1400: 3, 1800: 4 }}
+        >
+          <Masonry gutter="8px">
+            {images.map((img, idx) => 
+              img.cloudinary_image_url ? (
+                <div key={idx} className="relative">
+                  <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-colorSecondary z-0 min-h-32 min-w-64">
+                    <ImagePlaceholder />
+                  </div>
+                  <img
+                    src={img.cloudinary_image_url}
+                    alt={img.displayname || `gallery-img-${idx}`}
+                    className="relative z-10"
+                    style={{
+                      width: "100%",
+                      display: "block",
+                    }}
+                  />
+                </div>
+              ) : null
+            )}
+          </Masonry>
+        </ResponsiveMasonry>
+      )}
     </div>
   );
 };
